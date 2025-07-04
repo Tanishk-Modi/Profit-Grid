@@ -16,5 +16,4 @@ def hello():
 app.include_router(stocks.router, prefix="/api/v1")
 
 if __name__ == "__main__":
-    # dotenv.load_dotenv() # Load .env variables if not already handled
     uvicorn.run(app, host="0.0.0.0", port=8000)
