@@ -1,12 +1,12 @@
 import './App.css'
+import StockAnalyzer from './components/StockAnalyzer'
 
 function App() {
-
   return (
-    <>
-      <h1>Hello World</h1>
-    </>
-  )
+    <div className="App">
+      <StockAnalyzer />
+    </div>
+  );
 }
 
 export default App

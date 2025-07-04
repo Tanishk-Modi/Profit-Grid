@@ -8,4 +8,3 @@ def calculate_sma(prices: list, period: int) -> list:
         else:
             sma_values.append(None)
     return sma_values
-
