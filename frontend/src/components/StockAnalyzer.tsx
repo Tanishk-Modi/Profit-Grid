@@ -36,7 +36,7 @@ const StockAnalyzer: React.FC = () => {
       className="relative flex flex-col items-center justify-start min-h-screen pt-16 pb-8
                  bg-gradient-to-b from-gray-900 to-black text-gray-100 overflow-hidden"
     >
-      {/* Background Grid/Effect*/}
+      {/* Background Grid/Effect */}
       <div
         className="absolute inset-0 z-0 opacity-10"
         style={{
@@ -48,7 +48,7 @@ const StockAnalyzer: React.FC = () => {
 
       {/* Main Content Area */}
       <div className="relative z-10 text-center p-4 md:p-8 w-full max-w-5xl mx-auto flex flex-col items-center">
-        {/* Title/Header*/}
+        {/* Title/Header */}
         <h1 className="text-4xl md:text-6xl font-extrabold mb-8 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-green-500">
           Real-time Market Analysis
         </h1>
@@ -96,26 +96,66 @@ const StockAnalyzer: React.FC = () => {
 
         {stockData && (
           <div className="w-full text-left bg-gray-800 bg-opacity-70 backdrop-blur-sm p-6 rounded-lg shadow-xl border border-gray-700 animate-fade-in-up">
-            <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-green-500 mb-4">
+            <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-green-500 mb-6">
               {stockData.symbol} Overview
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-lg">
-              <p>
-                <span className="font-semibold text-gray-400">Price:</span>{' '}
-                <span className="text-green-400 text-2xl">${stockData.price.toFixed(2)}</span>
-              </p>
-              <p>
-                <span className="font-semibold text-gray-400">Change:</span>{' '}
-                <span className={parseFloat(stockData.change) >= 0 ? 'text-green-400' : 'text-red-400'}>
+
+            {/* Comprehensive Quote Display Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-4 text-lg">
+
+              {/* Current Price */}
+              <div className="flex flex-col">
+                <span className="text-gray-400 font-semibold text-base md:text-lg">Current Price</span>
+                <span className="text-green-400 text-3xl md:text-4xl font-bold">${stockData.price.toFixed(2)}</span>
+              </div>
+
+              {/* Change & Change Percent */}
+              <div className="flex flex-col">
+                <span className="text-gray-400 font-semibold text-base md:text-lg">Today's Change</span>
+                <span className={`text-2xl md:text-3xl font-bold ${parseFloat(stockData.change) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                   {stockData.change} ({stockData.change_percent})
                 </span>
-              </p>
-              <p>
-                <span className="font-semibold text-gray-400">Last Updated:</span>{' '}
-                {stockData.last_updated}
-              </p>
-              {/* More data points can be added here as needed (e.g., volume, high, low) */}
-            </div>
+              </div>
+
+              {/* Volume */}
+              <div className="flex flex-col">
+                <span className="text-gray-400 font-semibold text-base md:text-lg">Volume</span>
+                <span className="text-gray-200 text-2xl md:text-3xl font-bold">
+                  {stockData.volume.toLocaleString()}
+                </span>
+              </div>
+
+              {/* Open Price */}
+              <div className="flex flex-col">
+                <span className="text-gray-400 font-semibold text-base">Open</span>
+                <span className="text-gray-200 text-xl">${stockData.open_price.toFixed(2)}</span>
+              </div>
+
+              {/* High Price */}
+              <div className="flex flex-col">
+                <span className="text-gray-400 font-semibold text-base">High</span>
+                <span className="text-gray-200 text-xl">${stockData.high.toFixed(2)}</span>
+              </div>
+
+              {/* Low Price */}
+              <div className="flex flex-col">
+                <span className="text-gray-400 font-semibold text-base">Low</span>
+                <span className="text-gray-200 text-xl">${stockData.low.toFixed(2)}</span>
+              </div>
+
+              {/* Previous Close */}
+              <div className="flex flex-col">
+                <span className="text-gray-400 font-semibold text-base">Previous Close</span>
+                <span className="text-gray-200 text-xl">${parseFloat(stockData.previous_close).toFixed(2)}</span>
+              </div>
+
+              {/* Last Updated */}
+              <div className="flex flex-col">
+                <span className="text-gray-400 font-semibold text-base">Last Updated</span>
+                <span className="text-gray-200 text-xl">{stockData.last_updated}</span>
+              </div>
+
+            </div> {/* End of grid */}
           </div>
         )}
 

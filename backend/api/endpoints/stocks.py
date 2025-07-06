@@ -17,7 +17,12 @@ def get_stock(symbol: str):
                 "price": float(quote.get("05. price", 0)),
                 "change": quote.get("09. change", "0"),
                 "change_percent": quote.get("10. change percent", "0%"),
-                "last_updated": quote.get("07. latest trading day", "Unknown")
+                "last_updated": quote.get("07. latest trading day", "Unknown"),
+                "open_price": float(quote.get("02. open", 0)),
+                "high": float(quote.get("03. high", 0)),
+                "low": float(quote.get("04. low", 0)),
+                "volume": int(quote.get("06. volume", 0)),
+                "previous_close": quote.get("08. previous close", 0)
             }
         else:
             raise HTTPException(status_code=404, detail=f"Could not get data for {symbol}. Unexpected API response.")
