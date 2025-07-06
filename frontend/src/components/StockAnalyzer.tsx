@@ -10,7 +10,7 @@ const StockAnalyzer: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'; // Fallback for safety
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'; 
 
   const handleSearch = async () => {
     setLoading(true);
@@ -66,7 +66,7 @@ const StockAnalyzer: React.FC = () => {
       <div
         className="absolute inset-0 z-0 opacity-10"
         style={{
-          backgroundImage: 'linear-gradient(to right, #2d3748 1px, transparent 1px), linear-gradient(to bottom, #2d3748 1px, transparent 1px)',
+          backgroundImage: 'linear-gradient(to right, #2d3748 1px, transparent 3px), linear-gradient(to bottom, #2d3748 1px, transparent 3px)',
           backgroundSize: '30px 30px',
           maskImage: 'radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.8) 70%)',
         }}
@@ -75,8 +75,8 @@ const StockAnalyzer: React.FC = () => {
       {/* Main Content Area */}
       <div className="relative z-10 text-center p-4 md:p-8 w-full max-w-5xl mx-auto flex flex-col items-center">
         {/* Title/Header */}
-        <h1 className="text-4xl md:text-6xl font-extrabold mb-8 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-green-500">
-          Real-time Market Analysis
+        <h1 className="text-4xl md:text-6xl font-extrabold mb-8 p-3 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-green-500">
+          Profit-Grid: Real-time Market Analysis
         </h1>
 
         {/* Stock Search Input and Button */}
@@ -122,7 +122,7 @@ const StockAnalyzer: React.FC = () => {
         ) : stockData ? ( // If successful fetch
           <div className="w-full">
             {/* Comprehensive Quote Display Grid */}
-            <div className="w-full text-left bg-gray-800 bg-opacity-70 backdrop-blur-sm p-6 rounded-lg shadow-xl border border-gray-700 animate-fade-in-up">
+            <div className="w-full text-left bg-gray-900 bg-opacity-70 backdrop-blur-sm p-6 rounded-lg shadow-xl border border-gray-700 animate-fade-in-up">
               <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-green-500 mb-6">
                 {stockData.symbol} Overview
               </h2>

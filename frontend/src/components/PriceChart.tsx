@@ -1,5 +1,5 @@
-import React from 'react'
-import { Line } from 'react-chartjs-2'
+import React from 'react';
+import { Line } from 'react-chartjs-2';
 
 import {
   Chart as ChartJS,
@@ -10,8 +10,10 @@ import {
   Title,
   Tooltip,
   Legend,
+  Filler, 
 } from 'chart.js';
 
+// Register Chart.js components
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -19,114 +21,120 @@ ChartJS.register(
   LineElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  Filler 
 );
-
 interface PriceChartProps {
-    priceHistory: { date: string, close: number } [];
-    symbol: string
+  priceHistory: { date: string; close: number }[];
+  symbol: string;
 }
 
-const PriceChart: React.FC<PriceChartProps> = ({ priceHistory, symbol} ) => {
+const PriceChart: React.FC<PriceChartProps> = ({ priceHistory, symbol }) => {
+  // Prepare data for Chart.js
+  const sortedData = [...priceHistory].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-    const sortedData = [...priceHistory].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const labels = sortedData.map((dataPoint) => dataPoint.date);
+  const dataValues = sortedData.map((dataPoint) => dataPoint.close);
 
-    const labels = sortedData.map((dataPoint) => dataPoint.date);
-    const dataValues = sortedData.map((dataPoint) => dataPoint.close);
+  const data = {
+    labels: labels,
+    datasets: [
+      {
+        label: `${symbol} Close Price`,
+        data: dataValues,
+        fill: 'start', // Fill area under the line starting from the X-axis
+        backgroundColor: (context: any) => { // Gradient fill for the area
+          const chart = context.chart;
+          const { ctx, chartArea } = chart;
+          if (!chartArea) {
+            return;
+          }
+          // Fill Gradient
+          const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+          // Top color 
+          gradient.addColorStop(0, 'rgba(16, 185, 129, 0.3)'); // Tailwind green-500 , 30% opacity
+          // Bottom color 
+          gradient.addColorStop(1, 'rgba(16, 185, 129, 0)'); // Tailwind green-500 , 0% opacity
+          return gradient;
+        },
+        borderColor: '#10B981', // Line color
+        tension: 0.2, // Smooth look
+        pointRadius: 0, // No individual data points visible on line
+        pointHoverRadius: 5, // Show points only on hover
+        pointHitRadius: 10, // Increase hit area for easier hovering
+        borderWidth: 2, // Line thickness
+      },
+    ],
+  };
 
-    const data = {
-        labels: labels, 
-        datasets: [
-            {
-                label: `${symbol} Close Price`,
-                data: dataValues,
-                fill: false,
-                borderColor: '#10B981',
-                tension: 0.1, // Smoothness of the line
-                pointRadius: 2, // Size of data points
-                pointBackgroundColor: '#10B981',
-                pointBorderColor: '#10B981',
-                pointHoverRadius: 4,
-                borderWidth: 2,
-            },
-        ],
-    };
-
-    const options = {
+  const options = {
     responsive: true,
-    maintainAspectRatio: false, // Allows you to control height with Tailwind classes
+    maintainAspectRatio: false,
     plugins: {
       legend: {
-        display: true,
-        position: 'top' as const,
-        labels: {
-          color: '#D1D5DB', // gray-300 for legend text
-          font: {
-            size: 14,
-          },
-        },
+        display: false, // Hide legend
       },
       title: {
-        display: true,
-        text: `${symbol} Daily Closing Price`,
-        color: '#F9FAFB', // gray-50 for title text
-        font: {
-          size: 20,
-        },
+        display: true, // Hide chart title
       },
       tooltip: {
-        backgroundColor: 'rgba(31, 41, 55, 0.9)', // gray-800 with opacity
-        titleColor: '#F9FAFB',
-        bodyColor: '#D1D5DB',
-        borderColor: '#10B981',
-        borderWidth: 1,
-        cornerRadius: 4,
-        padding: 10,
-        callbacks: {
+        mode: 'index' as const,
+        intersect: false,
+        backgroundColor: 'rgba(17, 24, 39, 0.9)', // bg-gray-900 with opacity for dark tooltip background
+        titleColor: '#F9FAFB', // Light text for title (date)
+        bodyColor: '#D1D5DB', // Slightly darker light text for body (price)
+        borderColor: '#10B981', // Green border for accent
+        borderWidth: 1, // Border thickness
+        cornerRadius: 4, // Rounded corners
+        padding: 10, // Tooltip padding
+        callbacks: { // Custom formatting for tooltip content
           title: function(context: any) {
-            return context[0].label; // Displays the date
+            return context[0].label; // Displays date
           },
           label: function(context: any) {
-            let label = context.dataset.label || '';
-            if (label) {
-              label += ': ';
-            }
+            let label = '';
             if (context.parsed.y !== null) {
               label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.parsed.y);
             }
-            return label;
-          }
-        }
+            return label; 
+          },
+          labelPointStyle: () => ({ pointStyle: 'line' as const, rotation: 0 })
+        },
       },
     },
     scales: {
       x: {
         grid: {
-          color: 'rgba(55, 65, 81, 0.5)', // gray-700 with opacity for x-axis grid lines
-          borderColor: '#4B5563', // gray-600 for axis line
+          display: true, 
+          drawBorder: false, 
+          color: 'rgba(55, 65, 81, 0.3)', 
         },
         ticks: {
-          color: '#D1D5DB', // gray-300 for x-axis labels
-          maxTicksLimit: 10, // Limit number of ticks to prevent clutter
+          color: '#D1D5DB', 
+          maxTicksLimit: 8, 
+          autoSkipPadding: 10, 
         },
       },
       y: {
         grid: {
-          color: 'rgba(55, 65, 81, 0.5)', // gray-700 with opacity for y-axis grid lines
-          borderColor: '#4B5563', // gray-600 for axis line
+          display: true, 
+          drawBorder: false, 
+          color: 'rgba(55, 65, 81, 0.3)',
         },
         ticks: {
-          color: '#D1D5DB', // gray-300 for y-axis labels
+          color: '#D1D5DB', 
           callback: function(value: string | number) {
-            return '$' + value; // Format y-axis labels as currency
+            return '$' + value; 
           },
+          maxTicksLimit: 7, 
         },
+        position: 'right' as const, 
       },
     },
   };
 
   return (
-    <div className="relative w-full h-80 md:h-96 mt-8 p-4 bg-gray-800 bg-opacity-70 backdrop-blur-sm rounded-lg shadow-xl border border-gray-700 flex items-center justify-center">
+    <div className="relative w-full h-80 md:h-96 mt-8 p-4 bg-[#080d1a] bg-opacity-70 backdrop-blur-sm rounded-lg shadow-xl border border-gray-700 flex items-center justify-center">
       {sortedData.length > 0 ? (
         <Line data={data} options={options} />
       ) : (
@@ -134,7 +142,6 @@ const PriceChart: React.FC<PriceChartProps> = ({ priceHistory, symbol} ) => {
       )}
     </div>
   );
-
 };
 
-export default PriceChart
+export default PriceChart;
