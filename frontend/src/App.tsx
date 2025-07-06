@@ -3,7 +3,7 @@ import StockAnalyzer from './components/StockAnalyzer'
 
 function App() {
   return (
-    <div className="App">
+    <div className="min-h-screen bg-gray-900 font-sans antialiased">
       <StockAnalyzer />
     </div>
   );
