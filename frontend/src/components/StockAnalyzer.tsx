@@ -3,7 +3,13 @@ import PriceChart from './PriceChart';
 import QuoteSkeleton from './QuoteSkeleton';
 import ChartSkeleton from './ChartSkeleton';
 
-const StockAnalyzer: React.FC = () => {
+interface StockAnalyzerProps {
+  authToken: string | null;
+  currentUserId: number | null;
+}
+
+const StockAnalyzer: React.FC<StockAnalyzerProps> = ({ authToken, currentUserId }) => {
+
   const [symbol, setSymbol] = useState<string>('');
   const [stockData, setStockData] = useState<any>(null);
   const [priceHistory, setPriceHistory] = useState<any[]>([]);
@@ -26,6 +32,13 @@ const StockAnalyzer: React.FC = () => {
     }
 
     try {
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+      if (authToken) {
+        headers['Authorization'] = `Bearer ${authToken}`;
+      }
+      
       // --- Fetch Stock Quote ---
       const stockResponse = await fetch(`${API_BASE_URL}/api/v1/stock/${symbol}`);
       let stockQuoteData = null; 
@@ -77,7 +90,7 @@ const StockAnalyzer: React.FC = () => {
       <div className="relative z-10 text-center p-4 md:p-8 w-full max-w-5xl mx-auto flex flex-col items-center">
         {/* Title/Header */}
         <h1 className="text-4xl md:text-6xl font-extrabold mb-8 p-3 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-green-500">
-          Profit-Grid: Real-time Market Analysis
+          Real-Time Market Analysis
         </h1>
 
         {/* Stock Search Input and Button */}
