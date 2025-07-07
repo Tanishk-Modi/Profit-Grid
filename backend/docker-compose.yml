@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine 
+    environment:
+      POSTGRES_DB: stock_tracker_db # Database name
+      POSTGRES_USER: user # Database username
+      POSTGRES_PASSWORD: password # Database password
+    ports:
+      - "5432:5432" # Map container port 5432 to host port 5432
+    volumes:
+      - db_data:/var/lib/postgresql/data # Persistent data volume
+
+volumes:
+  db_data: # Define named volume
