@@ -9,6 +9,7 @@ const StockAnalyzer: React.FC = () => {
   const [priceHistory, setPriceHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const isStockLosing = stockData ? parseFloat(stockData.change) < 0 : false;
 
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'; 
 
@@ -184,7 +185,7 @@ const StockAnalyzer: React.FC = () => {
 
             {/* Price Chart */}
             {priceHistory.length > 0 ? (
-              <PriceChart priceHistory={priceHistory} symbol={stockData.symbol} />
+              <PriceChart priceHistory={priceHistory} symbol={stockData.symbol} isLosing={isStockLosing} />
             ) : (
                 // Show a message if stock data is there but no history (e.g., failed to fetch history)
                 <div className="w-full text-center mt-8 p-4 bg-gray-800 bg-opacity-70 backdrop-blur-sm rounded-lg shadow-xl border border-gray-700">

@@ -27,14 +27,20 @@ ChartJS.register(
 interface PriceChartProps {
   priceHistory: { date: string; close: number }[];
   symbol: string;
+  isLosing: boolean;
 }
 
-const PriceChart: React.FC<PriceChartProps> = ({ priceHistory, symbol }) => {
+const PriceChart: React.FC<PriceChartProps> = ({ priceHistory, symbol, isLosing }) => {
   // Prepare data for Chart.js
   const sortedData = [...priceHistory].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   const labels = sortedData.map((dataPoint) => dataPoint.date);
   const dataValues = sortedData.map((dataPoint) => dataPoint.close);
+
+  const lineColor = isLosing ? '#F7525F' : '#10B981'; 
+  const gradientStartColor = isLosing ? 'rgba(247, 82, 95, 0.3)' : 'rgba(16, 185, 129, 0.3)'; 
+  const gradientEndColor = isLosing ? 'rgba(247, 82, 95, 0)' : 'rgba(16, 185, 129, 0)'; 
+
 
   const data = {
     labels: labels,
@@ -42,27 +48,24 @@ const PriceChart: React.FC<PriceChartProps> = ({ priceHistory, symbol }) => {
       {
         label: `${symbol} Close Price`,
         data: dataValues,
-        fill: 'start', // Fill area under the line starting from the X-axis
-        backgroundColor: (context: any) => { // Gradient fill for the area
+        fill: 'start',
+        backgroundColor: (context: any) => {
           const chart = context.chart;
           const { ctx, chartArea } = chart;
           if (!chartArea) {
             return;
           }
-          // Fill Gradient
           const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
-          // Top color 
-          gradient.addColorStop(0, 'rgba(16, 185, 129, 0.3)'); // Tailwind green-500 , 30% opacity
-          // Bottom color 
-          gradient.addColorStop(1, 'rgba(16, 185, 129, 0)'); // Tailwind green-500 , 0% opacity
+          gradient.addColorStop(0, gradientStartColor); 
+          gradient.addColorStop(1, gradientEndColor);  
           return gradient;
         },
-        borderColor: '#10B981', // Line color
-        tension: 0.2, // Smooth look
-        pointRadius: 0, // No individual data points visible on line
-        pointHoverRadius: 5, // Show points only on hover
-        pointHitRadius: 10, // Increase hit area for easier hovering
-        borderWidth: 2, // Line thickness
+        borderColor: lineColor, 
+        tension: 0.2,
+        pointRadius: 0,
+        pointHoverRadius: 5,
+        pointHitRadius: 10,
+        borderWidth: 2,
       },
     ],
   };
@@ -72,31 +75,31 @@ const PriceChart: React.FC<PriceChartProps> = ({ priceHistory, symbol }) => {
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        display: false, // Hide legend
+        display: false,
       },
       title: {
-        display: true, // Hide chart title
+        display: false,
       },
       tooltip: {
         mode: 'index' as const,
         intersect: false,
-        backgroundColor: 'rgba(17, 24, 39, 0.9)', // bg-gray-900 with opacity for dark tooltip background
-        titleColor: '#F9FAFB', // Light text for title (date)
-        bodyColor: '#D1D5DB', // Slightly darker light text for body (price)
-        borderColor: '#10B981', // Green border for accent
-        borderWidth: 1, // Border thickness
-        cornerRadius: 4, // Rounded corners
-        padding: 10, // Tooltip padding
-        callbacks: { // Custom formatting for tooltip content
+        backgroundColor: 'rgba(17, 24, 39, 0.9)',
+        titleColor: '#F9FAFB',
+        bodyColor: '#D1D5DB',
+        borderColor: lineColor, 
+        borderWidth: 1,
+        cornerRadius: 4,
+        padding: 10,
+        callbacks: {
           title: function(context: any) {
-            return context[0].label; // Displays date
+            return context[0].label;
           },
           label: function(context: any) {
             let label = '';
             if (context.parsed.y !== null) {
               label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.parsed.y);
             }
-            return label; 
+            return label;
           },
           labelPointStyle: () => ({ pointStyle: 'line' as const, rotation: 0 })
         },
@@ -105,30 +108,30 @@ const PriceChart: React.FC<PriceChartProps> = ({ priceHistory, symbol }) => {
     scales: {
       x: {
         grid: {
-          display: true, 
-          drawBorder: false, 
-          color: 'rgba(55, 65, 81, 0.3)', 
+          display: true,
+          drawBorder: false,
+          color: 'rgba(55, 65, 81, 0.3)',
         },
         ticks: {
-          color: '#D1D5DB', 
-          maxTicksLimit: 8, 
-          autoSkipPadding: 10, 
+          color: '#D1D5DB',
+          maxTicksLimit: 6,
+          autoSkipPadding: 10,
         },
       },
       y: {
         grid: {
-          display: true, 
-          drawBorder: false, 
+          display: true,
+          drawBorder: false,
           color: 'rgba(55, 65, 81, 0.3)',
         },
         ticks: {
-          color: '#D1D5DB', 
+          color: '#D1D5DB',
           callback: function(value: string | number) {
-            return '$' + value; 
+            return '$' + value;
           },
-          maxTicksLimit: 7, 
+          maxTicksLimit: 5,
         },
-        position: 'right' as const, 
+        position: 'right' as const,
       },
     },
   };

@@ -20,7 +20,7 @@ def get_stock(symbol: str):
             return {
                 "symbol": quote.get("01. symbol", symbol),
                 "price": float(quote.get("05. price", 0)),
-                "change": quote.get("09. change", "0"),
+                "change": float(quote.get("09. change", "0")),
                 "change_percent": quote.get("10. change percent", "0%"),
                 "last_updated": quote.get("07. latest trading day", "Unknown"),
                 "open_price": float(quote.get("02. open", 0)),
