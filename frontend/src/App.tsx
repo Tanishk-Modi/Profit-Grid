@@ -88,61 +88,60 @@ function App() {
                       Profit Grid
                   </span>
               </div>
-                <div className="flex items-center space-x-4">
-                    {user.token && user.username ? (
-                        <>
-                            <span className="hidden sm:inline text-gray-300">Welcome, {user.username}!</span>
-                            <button
-                                onClick={handleShowWatchlist}
-                                className="px-4 py-2 rounded-md font-semibold text-sm
-                                         bg-gradient-to-r from-blue-500 to-indigo-600
-                                         hover:from-blue-600 hover:to-indigo-700
-                                         transition-all duration-300 ease-in-out
-                                         focus:outline-none focus:ring-2 focus:ring-blue-400"
-                            >
-                                My Watchlist
-                            </button>
-                            <button
-                                onClick={handleLogout}
-                                className="px-4 py-2 rounded-md font-semibold text-sm
-                                         bg-gradient-to-r from-red-500 to-rose-600
-                                         hover:from-red-600 hover:to-rose-700
-                                         transition-all duration-300 ease-in-out
-                                         focus:outline-none focus:ring-2 focus:ring-rose-400"
-                            >
-                                Logout
-                            </button>
-                        </>
-                    ) : (
-                        // Show Login/Register buttons if not logged in
-                        <>
-                            <button
-                              onClick={() => handleShowAuth('Login')}
-                              className="px-4 py-2 rounded-md font-semibold text-sm
-                                      bg-gradient-to-r from-teal-500 to-green-600
-                                      hover:from-teal-600 hover:to-green-700
-                                      shadow-md hover:shadow-lg
-                                      hover:scale-[1.02]
-                                      transition-all duration-200 ease-in-out
-                                      focus:outline-none focus:ring-2 focus:ring-green-400"
-                          >
-                              Login
-                          </button>
-                          <button
-                              onClick={() => handleShowAuth('Register')}
-                              className="px-4 py-2 rounded-md font-semibold text-sm
-                                      bg-gradient-to-r from-blue-500 to-indigo-600
-                                      hover:from-blue-600 hover:to-indigo-700
-                                      shadow-md hover:shadow-lg
-                                      hover:scale-[1.02]
-                                      transition-all duration-200 ease-in-out
-                                      focus:outline-none focus:ring-2 focus:ring-blue-400"
-                          >
-                              Register
-                          </button>
-                        </>
-                    )}
-                </div>
+              <div className="flex items-center space-x-4">
+                  {user.token && user.username ? (
+                      <>
+                        <span className="hidden sm:inline text-gray-300">Welcome, {user.username}!</span>
+                        <button
+                            onClick={handleShowWatchlist}
+                            className="px-4 py-2 rounded-full font-semibold text-sm
+                                    bg-gradient-to-r from-blue-500 to-indigo-600
+                                    hover:from-blue-600 hover:to-indigo-700
+                                    transition-all duration-300 ease-in-out
+                                    focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        >
+                            My Watchlist
+                        </button>
+                        <button
+                            onClick={handleLogout}
+                            className="px-4 py-2 rounded-full font-semibold text-sm
+                                    bg-gradient-to-r from-red-500 to-orange-600
+                                    hover:from-red-600 hover:to-orange-700
+                                    transition-all duration-300 ease-in-out
+                                    focus:outline-none focus:ring-2 focus:ring-orange-400"
+                        >
+                            Logout
+                        </button>
+                    </>
+                  ) : (
+                      <>
+                        <button
+                            onClick={() => handleShowAuth('Login')}
+                            className="px-4 py-2 rounded-full font-semibold text-sm
+                                    bg-gradient-to-r from-teal-500 to-green-600
+                                    hover:from-teal-600 hover:to-green-700
+                                    shadow-md hover:shadow-lg
+                                    hover:scale-[1.02]
+                                    transition-all duration-200 ease-in-out
+                                    focus:outline-none focus:ring-2 focus:ring-green-400"
+                        >
+                            Login
+                        </button>
+                        <button
+                            onClick={() => handleShowAuth('Register')}
+                            className="px-4 py-2 rounded-full font-semibold text-sm
+                                    bg-gradient-to-r from-blue-500 to-indigo-600
+                                    hover:from-blue-600 hover:to-indigo-700
+                                    shadow-md hover:shadow-lg
+                                    hover:scale-[1.02]
+                                    transition-all duration-200 ease-in-out
+                                    focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        >
+                            Register
+                        </button>
+                    </>
+                  )}
+              </div>
             </header>
             <div className="pt-16"> 
                 <StockAnalyzer
@@ -151,6 +150,28 @@ function App() {
                     initialSymbol={symbolToLoad} 
                 />
             </div>
+            
+            <footer className="rounded-lg shadow-sm bg-[#080d1a]">
+                <div className="w-full max-w-screen-xl mx-auto p-4 md:py-8">
+                    <div className="sm:flex sm:items-center sm:justify-between">
+                        <a href="" className="flex items-center mb-4 sm:mb-0 space-x-3 rtl:space-x-reverse">
+                            <img src="stocklogo.png" className="h-8" alt="Logo" />
+                            <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Profit Grid</span>
+                        </a>
+                        <ul className="flex flex-wrap items-center mb-6 text-sm font-medium text-gray-500 sm:mb-0 dark:text-gray-400">
+                            <li>
+                                <a href="https://github.com/Tanishk-Modi/Profit-Grid" className="hover:underline me-4 md:me-6">About</a>
+                            </li>
+                            <li>
+                                <a href="https://www.linkedin.com/in/tanishk-modi/" className="hover:underline">Contact</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <hr className="my-4 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-6" />
+                    <span className="block text-sm text-gray-500 sm:text-center dark:text-gray-400">© 2025 <a href="https://flowbite.com/" className="hover:underline">Profit Grid™</a>. All Rights Reserved.</span>
+                </div>
+            </footer>
+
         </div>
       );
     } else if (currentView === 'Register') {
