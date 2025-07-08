@@ -1,6 +1,5 @@
 from fastapi import APIRouter, HTTPException, status
 from services import fmp_service
-from services.indicator_calculator import calculate_sma
 import requests
 import logging
 
