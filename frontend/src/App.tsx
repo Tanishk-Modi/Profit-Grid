@@ -80,7 +80,7 @@ function App() {
             <header className="fixed top-0 left-0 right-0 z-20 bg-gray-900 p-4 flex justify-between items-center shadow-lg">
                 <div className="flex items-center space-x-3">
                   <img 
-                      src="/public/stocklogo.png" 
+                      src="stocklogo.png" 
                       alt="My Image" 
                       className="h-10 w-16 object-contain"
                   />
@@ -168,7 +168,7 @@ function App() {
                         </ul>
                     </div>
                     <hr className="my-4 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-6" />
-                    <span className="block text-sm text-gray-500 sm:text-center dark:text-gray-400">© 2025 <a href="https://flowbite.com/" className="hover:underline">Profit Grid™</a>. All Rights Reserved.</span>
+                    <span className="block text-sm text-gray-500 sm:text-center dark:text-gray-400">© 2025 <a href="" className="hover:underline">Profit Grid™</a>. All Rights Reserved.</span>
                 </div>
             </footer>
 
