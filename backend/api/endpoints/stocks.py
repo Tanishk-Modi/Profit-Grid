@@ -129,7 +129,7 @@ def get_price_history(symbol: str, days: int = 30):
             )
 
     except HTTPException:
-        # Re-raise HTTPExceptions (our custom errors)
+        # Re-raise HTTPExceptions (custom errors)
         raise
     except requests.exceptions.RequestException as e:
         logger.error(f"Request exception for historical data {symbol}: {str(e)}")

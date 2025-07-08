@@ -9,6 +9,13 @@ interface StockAnalyzerProps {
   initialSymbol: string | null; 
 }
 
+const PERIOD_OPTIONS = [
+  { label: '1M', days: 22 },   // ~22 trading days in a month
+  { label: '3M', days: 66 },   // ~66 trading days in 3 months
+  { label: '1Y', days: 252 },  // ~252 trading days in a year
+  { label: '5Y', days: 1260 }, // ~252*5
+];
+
 const StockAnalyzer: React.FC<StockAnalyzerProps> = ({ authToken, currentUserId, initialSymbol }) => {
 
   const [symbol, setSymbol] = useState<string>(''); 
@@ -20,15 +27,16 @@ const StockAnalyzer: React.FC<StockAnalyzerProps> = ({ authToken, currentUserId,
 
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
-  // Make handleSearch a useCallback to ensure it's stable for useEffect dependencies
-  const handleSearch = useCallback(async (searchSymbol: string) => {
+  const [selectedPeriod, setSelectedPeriod] = useState(PERIOD_OPTIONS[1]);
+
+  const handleSearch = useCallback(async (searchSymbol: string, days: number = selectedPeriod.days) => {
     setLoading(true);
     setError(null);
     setStockData(null);
     setPriceHistory([]);
     setWatchlistMessage(null);
 
-    if (!searchSymbol) { // Ensure this check happens BEFORE the fetch
+    if (!searchSymbol) { // Ensure this check happens before the fetch
       setError("Please enter a stock symbol.");
       setLoading(false);
       return;
@@ -39,7 +47,7 @@ const StockAnalyzer: React.FC<StockAnalyzerProps> = ({ authToken, currentUserId,
         'Content-Type': 'application/json',
       };
 
-      // Fetch Stock Quote
+     // Fetch Stock Quote
       const stockResponse = await fetch(`${API_BASE_URL}/api/v1/stock/${searchSymbol}`, { headers });
       if (!stockResponse.ok) {
         const errorData = await stockResponse.json();
@@ -48,8 +56,8 @@ const StockAnalyzer: React.FC<StockAnalyzerProps> = ({ authToken, currentUserId,
       const stockQuoteData = await stockResponse.json();
       setStockData(stockQuoteData);
 
-      // Fetch Price History
-      const priceResponse = await fetch(`${API_BASE_URL}/api/v1/price/${searchSymbol}?days=90`, { headers });
+      // Fetch Price History with days param
+      const priceResponse = await fetch(`${API_BASE_URL}/api/v1/price/${searchSymbol}?days=${days}`, { headers });
       if (!priceResponse.ok) {
         const errorData = await priceResponse.json();
         setPriceHistory([]);
@@ -65,14 +73,22 @@ const StockAnalyzer: React.FC<StockAnalyzerProps> = ({ authToken, currentUserId,
     } finally {
       setLoading(false);
     }
-  }, [API_BASE_URL]); // Dependencies for handleSearch useCallback
+  }, [API_BASE_URL, selectedPeriod.days]); // Dependencies for handleSearch useCallback
 
   useEffect(() => {
     if (initialSymbol && initialSymbol !== symbol) {
-      setSymbol(initialSymbol); 
-      handleSearch(initialSymbol); 
+      setSymbol(initialSymbol);
+      handleSearch(initialSymbol, selectedPeriod.days);
     }
-  }, [initialSymbol, symbol, handleSearch]); 
+  }, [initialSymbol, symbol, handleSearch, selectedPeriod.days]); 
+
+  // Handler for period button click
+  const handlePeriodChange = (period: typeof PERIOD_OPTIONS[0]) => {
+    setSelectedPeriod(period);
+    if (symbol) {
+      handleSearch(symbol, period.days);
+    }
+  };
 
   // Calculate if the stock is losing (used for chart color)
   const isStockLosing = stockData ? parseFloat(stockData.change) < 0 : false;
@@ -238,6 +254,24 @@ const StockAnalyzer: React.FC<StockAnalyzerProps> = ({ authToken, currentUserId,
                   <span className="text-gray-400 font-semibold text-base">Last Updated</span>
                   <span className="text-gray-200 text-xl">{stockData.last_updated}</span>
                 </div>
+              </div>
+            </div>
+
+            {/* Period Selection Bar */}
+            <div className="w-full flex justify-center my-6">
+              <div className="flex flex-row gap-2 bg-gray-900 bg-opacity-80 rounded-full px-4 py-2 shadow-md border border-gray-700">
+                {PERIOD_OPTIONS.map((option) => (
+                  <button
+                    key={option.label}
+                    onClick={() => handlePeriodChange(option)}
+                    className={`px-4 py-1 rounded-full font-semibold border transition-all duration-200
+                      ${selectedPeriod.label === option.label
+                        ? 'bg-teal-500 text-white border-teal-500 shadow'
+                        : 'bg-gray-800 text-gray-300 border-gray-700 hover:bg-teal-600 hover:text-white'}`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
               </div>
             </div>
 
