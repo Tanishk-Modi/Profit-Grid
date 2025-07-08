@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import StockAnalyzer from './components/StockAnalyzer';
 import Login from './auth/Login';
 import Register from './auth/Register';
+import WatchlistDisplay from './components/WatchlistDisplay';
 
 interface UserState {
   token: string | null;
@@ -9,13 +10,13 @@ interface UserState {
   username: string | null;
 }
 
-type AppView = 'Login' | 'Register' | 'Analyzer'; 
+type AppView = 'Login' | 'Register' | 'Analyzer' | 'Watchlist'; 
 
 function App() {
   const [user, setUser] = useState<UserState>({ token: null, userId: null, username: null });
   const [currentView, setCurrentView] = useState<AppView>('Analyzer');
+  const [symbolToLoad, setSymbolToLoad] = useState<string | null>(null);
 
-  // Effect to check for stored token on initial load
   useEffect(() => {
     const storedToken = localStorage.getItem('authToken');
     const storedUserId = localStorage.getItem('authUserId');
@@ -46,23 +47,36 @@ function App() {
     localStorage.removeItem('authUserId');
     localStorage.removeItem('authUsername');
     setUser({ token: null, userId: null, username: null });
-    setCurrentView('Analyzer'); // Stay on analyzer, but user is logged out
+    setCurrentView('Analyzer'); 
+    setSymbolToLoad(null);
   };
 
   const handleRegisterSuccess = () => {
-    setCurrentView('Login'); // After successful registration, direct to login
+    setCurrentView('Login'); 
   };
 
-  // --- Function to explicitly switch to Login/Register view ---
   const handleShowAuth = (view: 'Login' | 'Register') => {
     setCurrentView(view);
+  };
+
+  const handleShowWatchlist = () => {
+    if (user.token && user.userId) { 
+      setCurrentView('Watchlist');
+    } else {
+      setCurrentView('Login');
+    }
+  };
+
+   const handleWatchlistStockSelect = (symbol: string) => {
+    setSymbolToLoad(symbol); 
+    setCurrentView('Analyzer'); 
   };
 
   const renderContent = () => {
     if (currentView === 'Analyzer') {
       return (
         <div className="relative w-full">
-            {/* Main Header - Always visible regardless of login state */}
+            {/* Main Header */}
             <header className="fixed top-0 left-0 right-0 z-20 bg-gray-900 p-4 flex justify-between items-center shadow-lg">
                 <div className="flex items-center space-x-3">
                   <img 
@@ -70,15 +84,24 @@ function App() {
                       alt="My Image" 
                       className="h-10 w-16 object-contain"
                   />
-                  <span className="text-xl md:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-green-500">
+                  <span className="text-xl md:text-2xl hidden sm:inline font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-green-500">
                       Profit Grid
                   </span>
               </div>
                 <div className="flex items-center space-x-4">
-                    {/* Conditionally show Welcome/Logout or Login/Register buttons in header */}
                     {user.token && user.username ? (
                         <>
-                            <span className="text-gray-300">Welcome, {user.username}!</span>
+                            <span className="hidden sm:inline text-gray-300">Welcome, {user.username}!</span>
+                            <button
+                                onClick={handleShowWatchlist}
+                                className="px-4 py-2 rounded-md font-semibold text-sm
+                                         bg-gradient-to-r from-blue-500 to-indigo-600
+                                         hover:from-blue-600 hover:to-indigo-700
+                                         transition-all duration-300 ease-in-out
+                                         focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            >
+                                My Watchlist
+                            </button>
                             <button
                                 onClick={handleLogout}
                                 className="px-4 py-2 rounded-md font-semibold text-sm
@@ -122,25 +145,37 @@ function App() {
                 </div>
             </header>
             <div className="pt-16"> 
-                {/* Always render StockAnalyzer, passing user info (which might be null) */}
-                <StockAnalyzer authToken={user.token} currentUserId={user.userId} />
+                <StockAnalyzer
+                    authToken={user.token}
+                    currentUserId={user.userId}
+                    initialSymbol={symbolToLoad} 
+                />
             </div>
         </div>
       );
     } else if (currentView === 'Register') {
       return (
-        // Wrapper for Register component to center it
         <div className="min-h-screen flex items-center justify-center">
           <Register onSuccess={handleRegisterSuccess} onSwitchToLogin={() => setCurrentView('Login')} />
         </div>
       );
-    } else { // currentView === 'Login'
+    } else if (currentView == 'Login'){ 
       return (
-        // Wrapper for Login component to center it
         <div className="min-h-screen flex items-center justify-center">
           <Login onLoginSuccess={handleLoginSuccess} onSwitchToRegister={() => setCurrentView('Register')} />
         </div>
       );
+    } else { // currentView === 'Watchlist'
+      return (
+            <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+                <WatchlistDisplay
+                    authToken={user.token!} 
+                    currentUserId={user.userId!} 
+                    onClose={() => setCurrentView('Analyzer')}
+                    onStockSelect={handleWatchlistStockSelect}
+                />
+            </div>
+        );
     }
   };
 
