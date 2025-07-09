@@ -15,7 +15,9 @@ app = FastAPI()
 origins = [
     "http://localhost:5173",  
     "http://127.0.0.1:5173",
-    "https://profit-grid.vercel.app/"  
+    "https://profit-grid.vercel.app/",
+    "https://profit-grid-git-main-tanishk-modis-projects.vercel.app",
+    "https://profit-grid-ui69kmhu1-tanishk-modis-projects.vercel.app"  
 ]
 
 app.add_middleware(
