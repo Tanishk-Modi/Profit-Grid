@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'; 
+import React, { useState, useEffect, useCallback } from 'react';
 import QuoteSkeleton from './QuoteSkeleton';
 import ChartSkeleton from './ChartSkeleton';
 import PriceChart from './PriceChart';
@@ -6,7 +6,7 @@ import PriceChart from './PriceChart';
 interface StockAnalyzerProps {
   authToken: string | null;
   currentUserId: number | null;
-  initialSymbol: string | null; 
+  initialSymbol: string | null;
 }
 
 const PERIOD_OPTIONS = [
@@ -18,7 +18,7 @@ const PERIOD_OPTIONS = [
 
 const StockAnalyzer: React.FC<StockAnalyzerProps> = ({ authToken, currentUserId, initialSymbol }) => {
 
-  const [symbol, setSymbol] = useState<string>(''); 
+  const [symbol, setSymbol] = useState<string>('');
   const [stockData, setStockData] = useState<any>(null);
   const [priceHistory, setPriceHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -27,7 +27,7 @@ const StockAnalyzer: React.FC<StockAnalyzerProps> = ({ authToken, currentUserId,
 
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
-  const [selectedPeriod, setSelectedPeriod] = useState(PERIOD_OPTIONS[1]);
+  const [selectedPeriod, setSelectedPeriod] = useState(PERIOD_OPTIONS[1]); 
 
   const handleSearch = useCallback(async (searchSymbol: string, days: number = selectedPeriod.days) => {
     setLoading(true);
@@ -36,7 +36,7 @@ const StockAnalyzer: React.FC<StockAnalyzerProps> = ({ authToken, currentUserId,
     setPriceHistory([]);
     setWatchlistMessage(null);
 
-    if (!searchSymbol) { // Ensure this check happens before the fetch
+    if (!searchSymbol) {
       setError("Please enter a stock symbol.");
       setLoading(false);
       return;
@@ -59,8 +59,9 @@ const StockAnalyzer: React.FC<StockAnalyzerProps> = ({ authToken, currentUserId,
       // Fetch Price History with days param
       const priceResponse = await fetch(`${API_BASE_URL}/api/v1/price/${searchSymbol}?days=${days}`, { headers });
       if (!priceResponse.ok) {
-        const errorData = await priceResponse.json();
-        setPriceHistory([]);
+        // If price history fetch fails, we still want to show stock quote if available
+        console.error("Failed to fetch price history:", await priceResponse.json());
+        setPriceHistory([]); // Set to empty array to ensure no old data is shown
       } else {
         const priceHistoryData = await priceResponse.json();
         setPriceHistory(priceHistoryData.prices || []);
@@ -68,19 +69,19 @@ const StockAnalyzer: React.FC<StockAnalyzerProps> = ({ authToken, currentUserId,
 
     } catch (err: any) {
       setError(err.message || "An unexpected error occurred during data fetching.");
-      setStockData(null);
-      setPriceHistory([]);
+      setStockData(null); // Clear stock data on error
+      setPriceHistory([]); // Clear price history on error
     } finally {
       setLoading(false);
     }
-  }, [API_BASE_URL, selectedPeriod.days]); // Dependencies for handleSearch useCallback
+  }, [API_BASE_URL, selectedPeriod.days]);
 
   useEffect(() => {
     if (initialSymbol && initialSymbol !== symbol) {
       setSymbol(initialSymbol);
       handleSearch(initialSymbol, selectedPeriod.days);
     }
-  }, [initialSymbol, symbol, handleSearch, selectedPeriod.days]); 
+  }, [initialSymbol, symbol, handleSearch, selectedPeriod.days]);
 
   // Handler for period button click
   const handlePeriodChange = (period: typeof PERIOD_OPTIONS[0]) => {
@@ -91,7 +92,9 @@ const StockAnalyzer: React.FC<StockAnalyzerProps> = ({ authToken, currentUserId,
   };
 
   // Calculate if the stock is losing (used for chart color)
-  const isStockLosing = stockData ? parseFloat(stockData.change) < 0 : false;
+  const isStockLosing = priceHistory.length > 1
+  ? priceHistory[priceHistory.length - 1].close < priceHistory[0].close
+  : false;
 
   // Function to add stock to watchlist
   const handleAddToWatchlist = async () => {
@@ -127,6 +130,16 @@ const StockAnalyzer: React.FC<StockAnalyzerProps> = ({ authToken, currentUserId,
       setWatchlistMessage(`Error: ${err.message || "Failed to add to watchlist."}`);
     }
   };
+
+  // Calculate period change (points and percent) for the selected period
+  let periodChange = null;
+  let periodChangePercent = null;
+  if (priceHistory.length > 1) {
+    const first = priceHistory[0].close;
+    const last = priceHistory[priceHistory.length - 1].close;
+    periodChange = last - first;
+    periodChangePercent = ((periodChange / first) * 100);
+  }
 
   return (
     <div
@@ -275,20 +288,27 @@ const StockAnalyzer: React.FC<StockAnalyzerProps> = ({ authToken, currentUserId,
               </div>
             </div>
 
-            {/* Price Chart */}
-            {priceHistory.length > 0 ? (
-              <PriceChart priceHistory={priceHistory} symbol={stockData.symbol} isLosing={isStockLosing} />
-            ) : (
-                <div className="w-full text-center mt-8 p-4 bg-gray-800 bg-opacity-70 backdrop-blur-sm rounded-lg shadow-xl border border-gray-700">
-                    <p className="text-gray-400 text-xl">Historical chart data not available.</p>
+            {/* Price Chart with Subtle Period Change Display */}
+            <div className="relative w-full flex flex-col items-center">
+              {priceHistory.length > 1 && (
+                <div className="absolute right-2 top-2 z-10">
+                  <span className={`text-sm font-medium px-2 py-1 rounded
+                    ${periodChange && periodChange >= 0 ? 'bg-green-900/40 text-green-300' : 'bg-red-900/40 text-red-300'}`}>
+                    {periodChange && periodChange >= 0 ? '+' : ''}
+                    {periodChange?.toFixed(2)} ({periodChangePercent?.toFixed(2)}%) over {selectedPeriod.label}
+                  </span>
                 </div>
-            )}
+              )}
+              {priceHistory.length > 0 ? (
+                <PriceChart priceHistory={priceHistory} symbol={stockData.symbol} isLosing={isStockLosing} />
+              ) : (
+                <div className="w-full text-center mt-8 p-4 bg-gray-800 bg-opacity-70 backdrop-blur-sm rounded-lg shadow-xl border border-gray-700">
+                  <p className="text-gray-400 text-xl">Historical chart data not available.</p>
+                </div>
+              )}
+            </div>
           </div>
-        ) : (
-          <p className="text-gray-500 text-xl mt-8">
-            
-          </p>
-        )}
+        ) : null }
       </div>
     </div>
   );

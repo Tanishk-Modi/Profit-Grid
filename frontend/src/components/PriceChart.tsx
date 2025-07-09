@@ -127,7 +127,7 @@ const PriceChart: React.FC<PriceChartProps> = ({ priceHistory, symbol, isLosing 
         ticks: {
           color: '#D1D5DB',
           callback: function(value: string | number) {
-            return '$' + value;
+            return '$' + parseFloat(value.toString()).toFixed(2);
           },
           maxTicksLimit: 5,
         },
