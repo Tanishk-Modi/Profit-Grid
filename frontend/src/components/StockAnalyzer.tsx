@@ -300,7 +300,12 @@ const StockAnalyzer: React.FC<StockAnalyzerProps> = ({ authToken, currentUserId,
                 </div>
               )}
               {priceHistory.length > 0 ? (
-                <PriceChart priceHistory={priceHistory} symbol={stockData.symbol} isLosing={isStockLosing} />
+                <PriceChart
+                  priceHistory={priceHistory}
+                  symbol={stockData.symbol}
+                  isLosing={isStockLosing}
+                  periodLabel={selectedPeriod.label} // Pass period label for x-axis formatting
+                />
               ) : (
                 <div className="w-full text-center mt-8 p-4 bg-gray-800 bg-opacity-70 backdrop-blur-sm rounded-lg shadow-xl border border-gray-700">
                   <p className="text-gray-400 text-xl">Historical chart data not available.</p>
