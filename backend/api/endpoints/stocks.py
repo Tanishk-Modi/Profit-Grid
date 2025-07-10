@@ -142,3 +142,60 @@ def get_price_history(symbol: str, days: int = 30):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"An unhandled error occurred in price history: {str(e)}"
         )
+
+# NEW ENDPOINT FOR COMPANY PROFILE
+@router.get("/profile/{symbol}")
+def get_company_profile(symbol: str):
+    """
+    Get detailed company profile information
+    """
+    try:
+        logger.info(f"Fetching company profile for {symbol}")
+        data = fmp_service.fetch_company_profile(symbol)
+
+        if "Error Message" in data:
+            logger.error(f"FMP service error for company profile {symbol}: {data['Error Message']}")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=data['Error Message']
+            )
+
+        if "Company Profile" in data:
+            profile = data["Company Profile"]
+            logger.info(f"Successfully processed company profile for {symbol}")
+            
+            # You can return the profile data directly, or pick specific fields
+            return {
+                "symbol": profile.get("Symbol", symbol),
+                "company_name": profile.get("Company Name", "N/A"),
+                "exchange": profile.get("Exchange", "N/A"),
+                "industry": profile.get("Industry", "N/A"),
+                "sector": profile.get("Sector", "N/A"),
+                "ceo": profile.get("CEO", "N/A"),
+                "website": profile.get("Website", "N/A"),
+                "full_time_employees": profile.get("Full Time Employees", "N/A"),
+                "country": profile.get("Country", "N/A"),
+                "ipo_date": profile.get("IPODate", "N/A"),
+                "market_cap": profile.get("Market Cap", "N/A")
+            }
+        else:
+            logger.error(f"Unexpected company profile data structure for {symbol}: {list(data.keys()) if isinstance(data, dict) else type(data)}")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Could not get company profile for {symbol}. Unexpected FMP API response structure."
+            )
+
+    except HTTPException:
+        raise
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Request exception for company profile {symbol}: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"External API request failed: {str(e)}"
+        )
+    except Exception as e:
+        logger.error(f"Unexpected error for company profile {symbol}: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"An unhandled error occurred in company profile: {str(e)}"
+        )

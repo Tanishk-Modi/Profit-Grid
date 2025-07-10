@@ -38,7 +38,7 @@ def _check_fmp_rate_limit(data):
             if "limit" in msg or "exceeded" in msg or "upgrade" in msg:
                 return True
     
-    if isinstance(data, list) and len(data) == 0:
+    if isinstance(data, list) and len(data) == 0: # FMP sometimes returns empty list on rate limit
         return True
     
     return False
@@ -162,3 +162,55 @@ def fetch_daily_time_series(symbol: str):
         return {"Error Message": f"Failed to fetch historical data for {symbol}: {str(e)}"}
     except Exception as e:
         return {"Error Message": f"Unexpected error fetching historical data for {symbol}: {str(e)}"}
+
+def fetch_company_profile(symbol: str):
+    cache_key = ("FMP_COMPANY_PROFILE", symbol)
+
+    cached_data = _api_cache.get(cache_key)
+    if cached_data and _is_cache_valid(cached_data):
+        return cached_data["data"]
+    
+    try:
+        url = f"{FMP_BASE_URL}/profile/{symbol}"
+        full_url = _add_api_key_to_url(url)
+        
+        response = requests.get(full_url)
+        response.raise_for_status()
+        data = response.json()
+        
+        if _check_fmp_rate_limit(data):
+            return {"Error Message": "FMP API rate limit reached. Please try again later."}
+
+        if not data or not isinstance(data, list) or len(data) == 0:
+            return {"Error Message": f"No company profile data found for {symbol}"}
+
+        profile_data = data[0]
+        
+        if not profile_data or "symbol" not in profile_data:
+            return {"Error Message": f"Invalid data structure returned for {symbol} profile"}
+
+        formatted_response = {
+            "Company Profile": {
+                "Symbol": profile_data.get("symbol", symbol),
+                "Company Name": profile_data.get("companyName", "N/A"),
+                "Exchange": profile_data.get("exchange", "N/A"),
+                "Industry": profile_data.get("industry", "N/A"),
+                "Sector": profile_data.get("sector", "N/A"),
+                "CEO": profile_data.get("ceo", "N/A"),
+                "Website": profile_data.get("website", "N/A"),
+                "Description": profile_data.get("description", "N/A"),
+                "Full Time Employees": profile_data.get("fullTimeEmployees", "N/A"),
+                "Country": profile_data.get("country", "N/A"),
+                "IPODate": profile_data.get("ipoDate", "N/A"),
+                "Market Cap": profile_data.get("mktCap", "N/A")
+            }
+        }
+
+        _api_cache[cache_key] = {"data": formatted_response, "timestamp": time.time()}
+        
+        return formatted_response
+
+    except requests.exceptions.RequestException as e:
+        return {"Error Message": f"Failed to fetch company profile for {symbol}: {str(e)}"}
+    except Exception as e:
+        return {"Error Message": f"Unexpected error fetching company profile for {symbol}: {str(e)}"}
