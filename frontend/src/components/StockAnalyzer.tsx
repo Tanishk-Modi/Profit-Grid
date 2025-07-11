@@ -21,7 +21,8 @@ const StockAnalyzer: React.FC<StockAnalyzerProps> = ({ authToken, currentUserId,
   const [symbol, setSymbol] = useState<string>('');
   const [stockData, setStockData] = useState<any>(null);
   const [priceHistory, setPriceHistory] = useState<any[]>([]);
-  const [companyProfile, setCompanyProfile] = useState<any>(null); 
+  const [companyProfile, setCompanyProfile] = useState<any>(null);
+  const [keyMetrics, setKeyMetrics] = useState<any>(null); 
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [watchlistMessage, setWatchlistMessage] = useState<string | null>(null);
@@ -35,7 +36,8 @@ const StockAnalyzer: React.FC<StockAnalyzerProps> = ({ authToken, currentUserId,
     setError(null);
     setStockData(null);
     setPriceHistory([]);
-    setCompanyProfile(null); 
+    setCompanyProfile(null);
+    setKeyMetrics(null); 
     setWatchlistMessage(null);
 
     if (!searchSymbol) {
@@ -61,7 +63,6 @@ const StockAnalyzer: React.FC<StockAnalyzerProps> = ({ authToken, currentUserId,
       // Fetch Price History with days param
       const priceResponse = await fetch(`${API_BASE_URL}/api/v1/price/${searchSymbol}?days=${days}`, { headers });
       if (!priceResponse.ok) {
-        // If price history fetch fails, we still want to show stock quote if available
         console.error("Failed to fetch price history:", await priceResponse.json());
         setPriceHistory([]); // Set to empty array to ensure no old data is shown
       } else {
@@ -69,22 +70,33 @@ const StockAnalyzer: React.FC<StockAnalyzerProps> = ({ authToken, currentUserId,
         setPriceHistory(priceHistoryData.prices || []);
       }
 
-      // NEW: Fetch Company Profile
+      // Fetch Company Profile
       const profileResponse = await fetch(`${API_BASE_URL}/api/v1/profile/${searchSymbol}`, { headers });
       if (!profileResponse.ok) {
           console.error("Failed to fetch company profile:", await profileResponse.json());
-          setCompanyProfile(null); // Set to null if fetch fails
+          setCompanyProfile(null); 
       } else {
           const companyProfileData = await profileResponse.json();
           setCompanyProfile(companyProfileData);
+      }
+
+      // Fetch Key Metrics
+      const keyMetricsResponse = await fetch(`${API_BASE_URL}/api/v1/key-metrics/${searchSymbol}`, { headers });
+      if (!keyMetricsResponse.ok) {
+          console.error("Failed to fetch key metrics:", await keyMetricsResponse.json());
+          setKeyMetrics(null);
+      } else {
+          const keyMetricsData = await keyMetricsResponse.json();
+          setKeyMetrics(keyMetricsData);
       }
 
 
     } catch (err: any) {
       setError(err.message || "An unexpected error occurred during data fetching.");
       setStockData(null); 
-      setPriceHistory([]); 
+      setPriceHistory([]);
       setCompanyProfile(null); 
+      setKeyMetrics(null); 
     } finally {
       setLoading(false);
     }
@@ -243,7 +255,7 @@ const StockAnalyzer: React.FC<StockAnalyzerProps> = ({ authToken, currentUserId,
             )}
 
             {/* Comprehensive Quote Display Grid */}
-            <div className="w-full text-left bg-gray-800 bg-opacity-70 backdrop-blur-sm p-6 rounded-lg shadow-xl border border-gray-700 animate-fade-in-up">
+            <div className="w-full text-left bg-gray-900 bg-opacity-70 backdrop-blur-sm p-6 rounded-lg shadow-xl border border-gray-700 animate-fade-in-up">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-4 text-lg">
                 <div className="flex flex-col">
                   <span className="text-gray-400 font-semibold text-base md:text-lg">Current Price</span>
@@ -329,7 +341,7 @@ const StockAnalyzer: React.FC<StockAnalyzerProps> = ({ authToken, currentUserId,
 
             {/* Company Profile Display */}
             {companyProfile && (
-              <div className="w-full text-left bg-gray-800 bg-opacity-70 backdrop-blur-sm p-6 rounded-lg shadow-xl border border-gray-700 mt-8 animate-fade-in-up">
+              <div className="w-full text-left bg-gray-900 bg-opacity-70 backdrop-blur-sm p-6 rounded-lg shadow-xl border border-gray-700 mt-8 animate-fade-in-up">
                 <h3 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500 mb-4">
                   Company Profile
                 </h3>
@@ -373,6 +385,49 @@ const StockAnalyzer: React.FC<StockAnalyzerProps> = ({ authToken, currentUserId,
                   <div className="flex flex-col">
                     <span className="text-gray-400 font-semibold text-base">Market Cap</span>
                     <span className="text-gray-200 text-xl">${parseFloat(companyProfile.market_cap).toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Key Metrics Display */}
+            {keyMetrics && (
+              <div className="w-full text-left bg-gray-900 bg-opacity-70 backdrop-blur-sm p-6 rounded-lg shadow-xl border border-gray-700 mt-8 animate-fade-in-up">
+                <h3 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500 mb-4">
+                  Key Financial Metrics
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-4 text-lg">
+                  <div className="flex flex-col">
+                    <span className="text-gray-400 font-semibold text-base">Date (Annual)</span>
+                    <span className="text-gray-200 text-xl">{keyMetrics.date}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-gray-400 font-semibold text-base">EPS</span>
+                    <span className="text-gray-200 text-xl">{keyMetrics.eps !== "N/A" ? parseFloat(keyMetrics.eps).toFixed(2) : "N/A"}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-gray-400 font-semibold text-base">P/E Ratio</span>
+                    <span className="text-gray-200 text-xl">{keyMetrics.pe_ratio !== "N/A" ? parseFloat(keyMetrics.pe_ratio).toFixed(2) : "N/A"}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-gray-400 font-semibold text-base">Revenue Per Share</span>
+                    <span className="text-gray-200 text-xl">{keyMetrics.revenue_per_share !== "N/A" ? parseFloat(keyMetrics.revenue_per_share).toFixed(2) : "N/A"}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-gray-400 font-semibold text-base">Net Income Per Share</span>
+                    <span className="text-gray-200 text-xl">{keyMetrics.net_income_per_share !== "N/A" ? parseFloat(keyMetrics.net_income_per_share).toFixed(2) : "N/A"}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-gray-400 font-semibold text-base">Current Ratio</span>
+                    <span className="text-gray-200 text-xl">{keyMetrics.current_ratio !== "N/A" ? parseFloat(keyMetrics.current_ratio).toFixed(2) : "N/A"}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-gray-400 font-semibold text-base">Debt to Equity</span>
+                    <span className="text-gray-200 text-xl">{keyMetrics.debt_to_equity !== "N/A" ? parseFloat(keyMetrics.debt_to_equity).toFixed(2) : "N/A"}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-gray-400 font-semibold text-base">Dividend Yield</span>
+                    <span className="text-gray-200 text-xl">{keyMetrics.dividend_yield !== "N/A" ? `${(parseFloat(keyMetrics.dividend_yield) * 100).toFixed(2)}%` : "N/A"}</span>
                   </div>
                 </div>
               </div>

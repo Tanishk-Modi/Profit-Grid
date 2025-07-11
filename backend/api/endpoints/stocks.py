@@ -143,7 +143,7 @@ def get_price_history(symbol: str, days: int = 30):
             detail=f"An unhandled error occurred in price history: {str(e)}"
         )
 
-# NEW ENDPOINT FOR COMPANY PROFILE
+# Endpoint for Company Profile (description removed)
 @router.get("/profile/{symbol}")
 def get_company_profile(symbol: str):
     """
@@ -153,6 +153,7 @@ def get_company_profile(symbol: str):
         logger.info(f"Fetching company profile for {symbol}")
         data = fmp_service.fetch_company_profile(symbol)
 
+        # Check for error messages first
         if "Error Message" in data:
             logger.error(f"FMP service error for company profile {symbol}: {data['Error Message']}")
             raise HTTPException(
@@ -160,11 +161,11 @@ def get_company_profile(symbol: str):
                 detail=data['Error Message']
             )
 
+        # Check if we have the expected Company Profile structure
         if "Company Profile" in data:
             profile = data["Company Profile"]
             logger.info(f"Successfully processed company profile for {symbol}")
             
-            # You can return the profile data directly, or pick specific fields
             return {
                 "symbol": profile.get("Symbol", symbol),
                 "company_name": profile.get("Company Name", "N/A"),
@@ -198,4 +199,59 @@ def get_company_profile(symbol: str):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"An unhandled error occurred in company profile: {str(e)}"
+        )
+
+# ENDPOINT FOR KEY METRICS
+@router.get("/key-metrics/{symbol}")
+def get_key_metrics(symbol: str):
+    """
+    Get key financial metrics and ratios for a company.
+    """
+    try:
+        logger.info(f"Fetching key metrics for {symbol}")
+        data = fmp_service.fetch_key_metrics(symbol)
+
+        if "Error Message" in data:
+            logger.error(f"FMP service error for key metrics {symbol}: {data['Error Message']}")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=data['Error Message']
+            )
+
+        if "Key Metrics" in data:
+            metrics = data["Key Metrics"]
+            logger.info(f"Successfully processed key metrics for {symbol}")
+            
+            # Format numeric values (e.g., to float or for display)
+            return {
+                "symbol": metrics.get("Symbol", symbol),
+                "date": metrics.get("Date", "N/A"),
+                "revenue_per_share": metrics.get("Revenue Per Share", "N/A"),
+                "net_income_per_share": metrics.get("Net Income Per Share", "N/A"),
+                "pe_ratio": metrics.get("PE Ratio", "N/A"),
+                "current_ratio": metrics.get("Current Ratio", "N/A"),
+                "debt_to_equity": metrics.get("Debt to Equity", "N/A"),
+                "dividend_yield": metrics.get("Dividend Yield", "N/A"),
+                "eps": metrics.get("EPS", "N/A")
+            }
+        else:
+            logger.error(f"Unexpected key metrics data structure for {symbol}: {list(data.keys()) if isinstance(data, dict) else type(data)}")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Could not get key metrics for {symbol}. Unexpected FMP API response structure."
+            )
+
+    except HTTPException:
+        raise
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Request exception for key metrics {symbol}: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"External API request failed: {str(e)}"
+        )
+    except Exception as e:
+        logger.error(f"Unexpected error for key metrics {symbol}: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"An unhandled error occurred in key metrics: {str(e)}"
         )

@@ -214,3 +214,54 @@ def fetch_company_profile(symbol: str):
         return {"Error Message": f"Failed to fetch company profile for {symbol}: {str(e)}"}
     except Exception as e:
         return {"Error Message": f"Unexpected error fetching company profile for {symbol}: {str(e)}"}
+
+def fetch_key_metrics(symbol: str):
+    cache_key = ("FMP_KEY_METRICS", symbol)
+
+    cached_data = _api_cache.get(cache_key)
+    if cached_data and _is_cache_valid(cached_data):
+        return cached_data["data"]
+    
+    try:
+        # FMP Key Metrics endpoint, requesting annual data
+        url = f"{FMP_BASE_URL}/key-metrics/{symbol}?period=annual" 
+        full_url = _add_api_key_to_url(url)
+        
+        response = requests.get(full_url)
+        response.raise_for_status()
+        data = response.json()
+        
+        if _check_fmp_rate_limit(data):
+            return {"Error Message": "FMP API rate limit reached. Please try again later."}
+
+        if not data or not isinstance(data, list) or len(data) == 0:
+            return {"Error Message": f"No key metrics data found for {symbol}"}
+
+        # Most recent annual data
+        metrics_data = data[0] 
+        
+        if not metrics_data or "symbol" not in metrics_data:
+            return {"Error Message": f"Invalid data structure returned for {symbol} key metrics"}
+
+        formatted_response = {
+            "Key Metrics": {
+                "Symbol": metrics_data.get("symbol", symbol),
+                "Date": metrics_data.get("date", "N/A"),
+                "Revenue Per Share": metrics_data.get("revenuePerShare", "N/A"),
+                "Net Income Per Share": metrics_data.get("netIncomePerShare", "N/A"),
+                "PE Ratio": metrics_data.get("peRatio", "N/A"),
+                "Current Ratio": metrics_data.get("currentRatio", "N/A"),
+                "Debt to Equity": metrics_data.get("debtToEquity", "N/A"),
+                "Dividend Yield": metrics_data.get("dividendYield", "N/A"),
+                "EPS": metrics_data.get("eps", "N/A")
+            }
+        }
+
+        _api_cache[cache_key] = {"data": formatted_response, "timestamp": time.time()}
+        
+        return formatted_response
+
+    except requests.exceptions.RequestException as e:
+        return {"Error Message": f"Failed to fetch key metrics for {symbol}: {str(e)}"}
+    except Exception as e:
+        return {"Error Message": f"Unexpected error fetching key metrics for {symbol}: {str(e)}"}
