@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import QuoteSkeleton from './QuoteSkeleton';
 import TradingViewChart from './TradingViewChart';
 import SymbolOverview from './SymbolOverview';
+import NewsWidget from './NewsWidget';
+import AnalysisWidget from './AnalysisWidget';
 
 interface StockAnalyzerProps {
   authToken: string | null;
@@ -384,6 +386,25 @@ const StockAnalyzer: React.FC<StockAnalyzerProps> = ({ authToken, currentUserId,
                 </div>
               </div>
             )}
+
+            {/* News & Analysis Widgets Side-by-Side */}
+            {symbol && (
+              <div className="w-full flex flex-col md:flex-row gap-8 mt-8">
+                <div className="md:w-1/2 w-full bg-gray-900 bg-opacity-70 p-4 rounded-lg shadow-xl border border-gray-700">
+                  <h3 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-green-400 mb-2">
+                    Latest News
+                  </h3>
+                  <NewsWidget symbol={symbol} />
+                </div>
+                <div className="md:w-1/2 w-full bg-gray-900 bg-opacity-70 p-4 rounded-lg shadow-xl border border-gray-700">
+                  <h3 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 mb-2">
+                    Technical Analysis
+                  </h3>
+                  <AnalysisWidget symbol={symbol} />
+                </div>
+              </div>
+            )}
+
           </div>
         ) : null }
       </div>

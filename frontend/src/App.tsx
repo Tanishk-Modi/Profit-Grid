@@ -4,6 +4,7 @@ import Login from './auth/Login';
 import Register from './auth/Register';
 import WatchlistDisplay from './components/WatchlistDisplay';
 import TickerTape from './components/TickerTape'; 
+import NewsWidget from './components/NewsWidget';
 
 interface UserState {
   token: string | null;
