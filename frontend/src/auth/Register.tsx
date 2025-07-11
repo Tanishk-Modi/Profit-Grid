@@ -3,9 +3,10 @@ import React, { useState } from 'react';
 interface RegisterProps {
   onSuccess: () => void; // Callback to handle successful registration
   onSwitchToLogin: () => void; // Callback to switch to login form
+  onBackToHome: () => void; // New callback to go back to home
 }
 
-const Register: React.FC<RegisterProps> = ({ onSuccess, onSwitchToLogin }) => {
+const Register: React.FC<RegisterProps> = ({ onSuccess, onSwitchToLogin, onBackToHome }) => {
   const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [confirmPassword, setConfirmPassword] = useState<string>('');
@@ -137,6 +138,16 @@ const Register: React.FC<RegisterProps> = ({ onSuccess, onSwitchToLogin }) => {
           Log In
         </button>
       </p>
+      <button
+        onClick={onBackToHome}
+        className="mt-4 px-4 py-2 rounded-full font-semibold text-sm
+                   bg-gray-700 text-gray-300 hover:bg-gray-600
+                   transition-all duration-200 ease-in-out
+                   focus:outline-none focus:ring-2 focus:ring-gray-500"
+        disabled={loading}
+      >
+        Back to Home
+      </button>
     </div>
   );
 };

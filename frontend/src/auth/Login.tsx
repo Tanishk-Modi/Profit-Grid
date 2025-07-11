@@ -3,9 +3,10 @@ import React, { useState } from 'react';
 interface LoginProps {
   onLoginSuccess: (token: string, userId: number, username: string) => void; // Callback for successful login
   onSwitchToRegister: () => void; // Callback to switch to the registration form
+  onBackToHome: () => void; // New callback to go back to home
 }
 
-const Login: React.FC<LoginProps> = ({ onLoginSuccess, onSwitchToRegister }) => {
+const Login: React.FC<LoginProps> = ({ onLoginSuccess, onSwitchToRegister, onBackToHome }) => {
   const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
@@ -96,6 +97,16 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess, onSwitchToRegister }) => 
           Register here
         </button>
       </p>
+      <button
+        onClick={onBackToHome}
+        className="mt-4 px-4 py-2 rounded-full font-semibold text-sm
+                   bg-gray-700 text-gray-300 hover:bg-gray-600
+                   transition-all duration-200 ease-in-out
+                   focus:outline-none focus:ring-2 focus:ring-gray-500"
+        disabled={loading}
+      >
+        Back to Home
+      </button>
     </div>
   );
 };

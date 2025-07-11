@@ -4,6 +4,7 @@ import Login from './auth/Login';
 import Register from './auth/Register';
 import WatchlistDisplay from './components/WatchlistDisplay';
 import TickerTape from './components/TickerTape'; 
+import CryptoAnalyzer from './components/CryptoAnalyzer'; // Import the new component
 
 interface UserState {
   token: string | null;
@@ -11,7 +12,7 @@ interface UserState {
   username: string | null;
 }
 
-type AppView = 'Login' | 'Register' | 'Analyzer' | 'Watchlist'; 
+type AppView = 'Login' | 'Register' | 'Analyzer' | 'Watchlist' | 'Crypto'; // Added 'Crypto' view
 
 function App() {
   const [user, setUser] = useState<UserState>({ token: null, userId: null, username: null });
@@ -56,7 +57,11 @@ function App() {
     setCurrentView('Login'); 
   };
 
-  const handleShowAuth = (view: 'Login' | 'Register') => {
+  const handleBackToHome = () => { // New function to go back to home
+    setCurrentView('Analyzer');
+  };
+
+  const handleShowAuth = (view: 'Login') => { // Only 'Login' now
     setCurrentView(view);
   };
 
@@ -116,6 +121,18 @@ function App() {
                     </>
                   ) : (
                       <>
+                      <button 
+                            onClick={() => setCurrentView('Crypto')}
+                            className="px-4 py-2 rounded-full font-semibold text-sm
+                                    bg-gradient-to-r from-orange-500 to-red-600
+                                    hover:from-orange-600 hover:to-red-700
+                                    shadow-md hover:shadow-lg
+                                    hover:scale-[1.02]
+                                    transition-all duration-200 ease-in-out
+                                    focus:outline-none focus:ring-2 focus:ring-orange-400"
+                        >
+                            Crypto
+                        </button>
                         <button
                             onClick={() => handleShowAuth('Login')}
                             className="px-4 py-2 rounded-full font-semibold text-sm
@@ -127,18 +144,6 @@ function App() {
                                     focus:outline-none focus:ring-2 focus:ring-green-400"
                         >
                             Login
-                        </button>
-                        <button
-                            onClick={() => handleShowAuth('Register')}
-                            className="px-4 py-2 rounded-full font-semibold text-sm
-                                    bg-gradient-to-r from-blue-500 to-indigo-600
-                                    hover:from-blue-600 hover:to-indigo-700
-                                    shadow-md hover:shadow-lg
-                                    hover:scale-[1.02]
-                                    transition-all duration-200 ease-in-out
-                                    focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        >
-                            Register
                         </button>
                     </>
                   )}
@@ -182,16 +187,94 @@ function App() {
     } else if (currentView === 'Register') {
       return (
         <div className="min-h-screen flex items-center justify-center">
-          <Register onSuccess={handleRegisterSuccess} onSwitchToLogin={() => setCurrentView('Login')} />
+          <Register onSuccess={handleRegisterSuccess} onSwitchToLogin={() => setCurrentView('Login')} onBackToHome={handleBackToHome} />
         </div>
       );
     } else if (currentView == 'Login'){ 
       return (
         <div className="min-h-screen flex items-center justify-center">
-          <Login onLoginSuccess={handleLoginSuccess} onSwitchToRegister={() => setCurrentView('Register')} />
+          <Login onLoginSuccess={handleLoginSuccess} onSwitchToRegister={() => setCurrentView('Register')} onBackToHome={handleBackToHome} />
         </div>
       );
-    } else { // currentView === 'Watchlist'
+    } else if (currentView === 'Crypto') { // Crypto view
+        return (
+            <div className="relative w-full">
+                {/* Header for Crypto page */}
+                <header className="fixed top-0 left-0 right-0 z-20 bg-[#080d1a] p-4 flex justify-between items-center shadow-lg">
+                    <div className="flex items-center space-x-3">
+                        <img 
+                            src="stocklogo.png" 
+                            alt="My Image" 
+                            className="h-10 w-16 object-contain"
+                        />
+                        <span className="text-xl md:text-2xl hidden sm:inline font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">
+                            Profit Grid
+                        </span>
+                    </div>
+                    <div className="flex items-center space-x-4">
+                        <button
+                            onClick={handleBackToHome}
+                            className="px-4 py-2 rounded-full font-semibold text-sm
+                                    bg-gradient-to-r from-orange-500 to-red-600
+                                    hover:from-orange-600 hover:to-red-700
+                                    shadow-md hover:shadow-lg
+                                    hover:scale-[1.02]
+                                    transition-all duration-200 ease-in-out
+                                    focus:outline-none focus:ring-2 focus:ring-orange-400"
+                        >
+                            Back to Stocks
+                        </button>
+                        {user.token && user.username ? (
+                            <>
+                                <span className="hidden sm:inline text-gray-300">Welcome, {user.username}!</span>
+                                <button
+                                    onClick={handleShowWatchlist}
+                                    className="px-4 py-2 rounded-full font-semibold text-sm
+                                            bg-gradient-to-r from-blue-500 to-indigo-600
+                                            hover:from-blue-600 hover:to-indigo-700
+                                            transition-all duration-300 ease-in-out
+                                            focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                >
+                                    My Watchlist
+                                </button>
+                                <button
+                                    onClick={handleLogout}
+                                    className="px-4 py-2 rounded-full font-semibold text-sm
+                                            bg-gradient-to-r from-red-500 to-orange-600
+                                            hover:from-red-600 hover:to-orange-700
+                                            transition-all duration-300 ease-in-out
+                                            focus:outline-none focus:ring-2 focus:ring-orange-400"
+                                >
+                                    Logout
+                                </button>
+                            </>
+                        ) : (
+                            <button
+                                onClick={() => handleShowAuth('Login')}
+                                className="px-4 py-2 rounded-full font-semibold text-sm
+                                            bg-gradient-to-r from-teal-500 to-green-600
+                                            hover:from-teal-600 hover:to-green-700
+                                            shadow-md hover:shadow-lg
+                                            hover:scale-[1.02]
+                                            transition-all duration-200 ease-in-out
+                                            focus:outline-none focus:ring-2 focus:ring-green-400"
+                            >
+                                Login
+                            </button>
+                        )}
+                    </div>
+                </header>
+                {/* TradingView Ticker Tape Widget */}
+                <div className="relative top-[68px] z-10 w-full"> 
+                    <TickerTape />
+                </div>
+                <div className="pt-[35px]"> {/* Adjust padding top to account for fixed header */}
+                    <CryptoAnalyzer />
+                </div>
+            </div>
+        );
+    }
+    else { // currentView === 'Watchlist'
       return (
             <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
                 <WatchlistDisplay
