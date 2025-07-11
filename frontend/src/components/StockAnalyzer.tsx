@@ -4,6 +4,9 @@ import TradingViewChart from './TradingViewChart';
 import SymbolOverview from './SymbolOverview';
 import NewsWidget from './NewsWidget';
 import AnalysisWidget from './AnalysisWidget';
+import QuoteDisplay from './QuoteDisplay';
+import KeyMetrics from './KeyMetrics';
+import CompanyProfile from './CompanyProfile';
 
 interface StockAnalyzerProps {
   authToken: string | null;
@@ -217,47 +220,8 @@ const StockAnalyzer: React.FC<StockAnalyzerProps> = ({ authToken, currentUserId,
               </p>
             )}
 
-            {/* Comprehensive Quote Display Grid */}
-            <div className="w-full text-left bg-gray-900 bg-opacity-70 backdrop-blur-sm p-6 rounded-lg shadow-xl border border-gray-700 animate-fade-in-up">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-4 text-lg">
-                <div className="flex flex-col">
-                  <span className="text-gray-400 font-semibold text-base md:text-lg">Current Price</span>
-                  <span className="text-green-400 text-3xl md:text-4xl font-bold">${stockData.price.toFixed(2)}</span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-gray-400 font-semibold text-base md:text-lg">Today's Change</span>
-                  <span className={`text-2xl md:text-3xl font-bold ${parseFloat(stockData.change) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                    {stockData.change} ({stockData.change_percent})
-                  </span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-gray-400 font-semibold text-base md:text-lg">Volume</span>
-                  <span className="text-gray-200 text-2xl md:text-3xl font-bold">
-                    {stockData.volume.toLocaleString()}
-                  </span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-gray-400 font-semibold text-base">Open</span>
-                  <span className="text-gray-200 text-xl">${stockData.open_price.toFixed(2)}</span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-gray-400 font-semibold text-base">High</span>
-                  <span className="text-gray-200 text-xl">${stockData.high.toFixed(2)}</span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-gray-400 font-semibold text-base">Low</span>
-                  <span className="text-gray-200 text-xl">${stockData.low.toFixed(2)}</span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-gray-400 font-semibold text-base">Previous Close</span>
-                  <span className="text-gray-200 text-xl">${parseFloat(stockData.previous_close).toFixed(2)}</span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-gray-400 font-semibold text-base">Last Updated</span>
-                  <span className="text-gray-200 text-xl">{stockData.last_updated}</span>
-                </div>
-              </div>
-            </div>
+            {/* Quote Display */}
+            <QuoteDisplay stockData={stockData} />
 
             {/* Chart Container */}
             <div className="relative w-full flex flex-col items-center mt-8">
@@ -294,98 +258,10 @@ const StockAnalyzer: React.FC<StockAnalyzerProps> = ({ authToken, currentUserId,
             </div>
 
             {/* Company Profile Display */}
-            {companyProfile && (
-              <div className="w-full text-left bg-gray-900 bg-opacity-70 backdrop-blur-sm p-6 rounded-lg shadow-xl border border-gray-700 mt-8 animate-fade-in-up">
-                <h3 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500 mb-4">
-                  Company Profile
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-4 text-lg">
-                  <div className="flex flex-col">
-                    <span className="text-gray-400 font-semibold text-base">Company Name</span>
-                    <span className="text-gray-200 text-xl">{companyProfile.company_name}</span>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-gray-400 font-semibold text-base">Exchange</span>
-                    <span className="text-gray-200 text-xl">{companyProfile.exchange}</span>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-gray-400 font-semibold text-base">Industry</span>
-                    <span className="text-gray-200 text-xl">{companyProfile.industry}</span>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-gray-400 font-semibold text-base">Sector</span>
-                    <span className="text-gray-200 text-xl">{companyProfile.sector}</span>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-gray-400 font-semibold text-base">CEO</span>
-                    <span className="text-gray-200 text-xl">{companyProfile.ceo}</span>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-gray-400 font-semibold text-base">Website</span>
-                    <a href={companyProfile.website} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline text-xl">{companyProfile.website}</a>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-gray-400 font-semibold text-base">Full Time Employees</span>
-                    <span className="text-gray-200 text-xl">{companyProfile.full_time_employees?.toLocaleString()}</span>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-gray-400 font-semibold text-base">Country</span>
-                    <span className="text-gray-200 text-xl">{companyProfile.country}</span>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-gray-400 font-semibold text-base">IPO Date</span>
-                    <span className="text-gray-200 text-xl">{companyProfile.ipo_date}</span>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-gray-400 font-semibold text-base">Market Cap</span>
-                    <span className="text-gray-200 text-xl">${parseFloat(companyProfile.market_cap).toLocaleString()}</span>
-                  </div>
-                </div>
-              </div>
-            )}
+            <CompanyProfile companyProfile={companyProfile} />
 
             {/* Key Metrics Display */}
-            {keyMetrics && (
-              <div className="w-full text-left bg-gray-900 bg-opacity-70 backdrop-blur-sm p-6 rounded-lg shadow-xl border border-gray-700 mt-8 animate-fade-in-up">
-                <h3 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500 mb-4">
-                  Key Financial Metrics
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-4 text-lg">
-                  <div className="flex flex-col">
-                    <span className="text-gray-400 font-semibold text-base">Date (Annual)</span>
-                    <span className="text-gray-200 text-xl">{keyMetrics.date}</span>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-gray-400 font-semibold text-base">EPS</span>
-                    <span className="text-gray-200 text-xl">{keyMetrics.eps !== "N/A" ? parseFloat(keyMetrics.eps).toFixed(2) : "N/A"}</span>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-gray-400 font-semibold text-base">P/E Ratio</span>
-                    <span className="text-gray-200 text-xl">{keyMetrics.pe_ratio !== "N/A" ? parseFloat(keyMetrics.pe_ratio).toFixed(2) : "N/A"}</span>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-gray-400 font-semibold text-base">Revenue Per Share</span>
-                    <span className="text-gray-200 text-xl">{keyMetrics.revenue_per_share !== "N/A" ? parseFloat(keyMetrics.revenue_per_share).toFixed(2) : "N/A"}</span>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-gray-400 font-semibold text-base">Net Income Per Share</span>
-                    <span className="text-gray-200 text-xl">{keyMetrics.net_income_per_share !== "N/A" ? parseFloat(keyMetrics.net_income_per_share).toFixed(2) : "N/A"}</span>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-gray-400 font-semibold text-base">Current Ratio</span>
-                    <span className="text-gray-200 text-xl">{keyMetrics.current_ratio !== "N/A" ? parseFloat(keyMetrics.current_ratio).toFixed(2) : "N/A"}</span>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-gray-400 font-semibold text-base">Debt to Equity</span>
-                    <span className="text-gray-200 text-xl">{keyMetrics.debt_to_equity !== "N/A" ? parseFloat(keyMetrics.debt_to_equity).toFixed(2) : "N/A"}</span>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-gray-400 font-semibold text-base">Dividend Yield</span>
-                    <span className="text-gray-200 text-xl">{keyMetrics.dividend_yield !== "N/A" ? `${(parseFloat(keyMetrics.dividend_yield) * 100).toFixed(2)}%` : "N/A"}</span>
-                  </div>
-                </div>
-              </div>
-            )}
+            <KeyMetrics keyMetrics={keyMetrics} />
 
             {/* News & Analysis Widgets Side-by-Side */}
             {symbol && (
