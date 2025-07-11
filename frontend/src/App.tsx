@@ -3,6 +3,7 @@ import StockAnalyzer from './components/StockAnalyzer';
 import Login from './auth/Login';
 import Register from './auth/Register';
 import WatchlistDisplay from './components/WatchlistDisplay';
+import TickerTape from './components/TickerTape'; 
 
 interface UserState {
   token: string | null;
@@ -143,7 +144,11 @@ function App() {
                   )}
               </div>
             </header>
-            <div className="pt-16"> 
+            {/* TradingView Ticker Tape Widget */}
+            <div className="relative top-[68px] z-10 w-full"> 
+                <TickerTape />
+            </div>
+            <div className="pt-[35px]"> 
                 <StockAnalyzer
                     authToken={user.token}
                     currentUserId={user.userId}
@@ -151,7 +156,7 @@ function App() {
                 />
             </div>
             
-            <footer className="rounded-lg shadow-sm bg-[#080d1a]">
+            <footer className="rounded-lg shadow-sm bg-[#080d1a] mt-8"> 
                 <div className="w-full max-w-screen-xl mx-auto p-4 md:py-8">
                     <div className="sm:flex sm:items-center sm:justify-between">
                         <a href="" className="flex items-center mb-4 sm:mb-0 space-x-3 rtl:space-x-reverse">
