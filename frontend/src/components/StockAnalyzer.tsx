@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import QuoteSkeleton from './QuoteSkeleton';
-import ChartSkeleton from './ChartSkeleton';
-import PriceChart from './PriceChart';
+import TradingViewChart from './TradingViewChart';
+import SymbolOverview from './SymbolOverview';
 
 interface StockAnalyzerProps {
   authToken: string | null;
@@ -9,36 +9,27 @@ interface StockAnalyzerProps {
   initialSymbol: string | null;
 }
 
-const PERIOD_OPTIONS = [
-  { label: '1M', days: 22 },   // ~22 trading days in a month
-  { label: '3M', days: 66 },   // ~66 trading days in 3 months
-  { label: '1Y', days: 252 },  // ~252 trading days in a year
-  { label: '5Y', days: 1260 }, // ~252*5
-];
-
 const StockAnalyzer: React.FC<StockAnalyzerProps> = ({ authToken, currentUserId, initialSymbol }) => {
 
   const [symbol, setSymbol] = useState<string>('');
   const [stockData, setStockData] = useState<any>(null);
-  const [priceHistory, setPriceHistory] = useState<any[]>([]);
   const [companyProfile, setCompanyProfile] = useState<any>(null);
   const [keyMetrics, setKeyMetrics] = useState<any>(null); 
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [watchlistMessage, setWatchlistMessage] = useState<string | null>(null);
+  const [showTradingViewChart, setShowTradingViewChart] = useState<boolean>(false);
 
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
-  const [selectedPeriod, setSelectedPeriod] = useState(PERIOD_OPTIONS[1]); 
-
-  const handleSearch = useCallback(async (searchSymbol: string, days: number = selectedPeriod.days) => {
+  const handleSearch = useCallback(async (searchSymbol: string) => {
     setLoading(true);
     setError(null);
     setStockData(null);
-    setPriceHistory([]);
     setCompanyProfile(null);
     setKeyMetrics(null); 
     setWatchlistMessage(null);
+    setShowTradingViewChart(false);
 
     if (!searchSymbol) {
       setError("Please enter a stock symbol.");
@@ -59,16 +50,6 @@ const StockAnalyzer: React.FC<StockAnalyzerProps> = ({ authToken, currentUserId,
       }
       const stockQuoteData = await stockResponse.json();
       setStockData(stockQuoteData);
-
-      // Fetch Price History with days param
-      const priceResponse = await fetch(`${API_BASE_URL}/api/v1/price/${searchSymbol}?days=${days}`, { headers });
-      if (!priceResponse.ok) {
-        console.error("Failed to fetch price history:", await priceResponse.json());
-        setPriceHistory([]); // Set to empty array to ensure no old data is shown
-      } else {
-        const priceHistoryData = await priceResponse.json();
-        setPriceHistory(priceHistoryData.prices || []);
-      }
 
       // Fetch Company Profile
       const profileResponse = await fetch(`${API_BASE_URL}/api/v1/profile/${searchSymbol}`, { headers });
@@ -94,33 +75,24 @@ const StockAnalyzer: React.FC<StockAnalyzerProps> = ({ authToken, currentUserId,
     } catch (err: any) {
       setError(err.message || "An unexpected error occurred during data fetching.");
       setStockData(null); 
-      setPriceHistory([]);
       setCompanyProfile(null); 
       setKeyMetrics(null); 
     } finally {
       setLoading(false);
     }
-  }, [API_BASE_URL, selectedPeriod.days]);
+  }, [API_BASE_URL]);
 
   useEffect(() => {
     if (initialSymbol && initialSymbol !== symbol) {
       setSymbol(initialSymbol);
-      handleSearch(initialSymbol, selectedPeriod.days);
+      handleSearch(initialSymbol);
     }
-  }, [initialSymbol, symbol, handleSearch, selectedPeriod.days]);
+  }, [initialSymbol, symbol, handleSearch]);
 
-  // Handler for period button click
-  const handlePeriodChange = (period: typeof PERIOD_OPTIONS[0]) => {
-    setSelectedPeriod(period);
-    if (symbol) {
-      handleSearch(symbol, period.days);
-    }
-  };
-
-  // Calculate if the stock is losing (used for chart color)
-  const isStockLosing = priceHistory.length > 1
-  ? priceHistory[priceHistory.length - 1].close < priceHistory[0].close
-  : false;
+  // Toggle chart type between SymbolOverview and TradingViewChart
+  const toggleChartType = useCallback(() => {
+      setShowTradingViewChart(prev => !prev);
+  }, []);
 
   // Function to add stock to watchlist
   const handleAddToWatchlist = async () => {
@@ -156,16 +128,6 @@ const StockAnalyzer: React.FC<StockAnalyzerProps> = ({ authToken, currentUserId,
       setWatchlistMessage(`Error: ${err.message || "Failed to add to watchlist."}`);
     }
   };
-
-  // Calculate period change (points and percent) for the selected period
-  let periodChange = null;
-  let periodChangePercent = null;
-  if (priceHistory.length > 1) {
-    const first = priceHistory[0].close;
-    const last = priceHistory[priceHistory.length - 1].close;
-    periodChange = last - first;
-    periodChangePercent = ((periodChange / first) * 100);
-  }
 
   return (
     <div
@@ -222,7 +184,6 @@ const StockAnalyzer: React.FC<StockAnalyzerProps> = ({ authToken, currentUserId,
         {loading ? (
           <div className="w-full">
             <QuoteSkeleton />
-            <ChartSkeleton />
           </div>
         ) : error ? (
           <div className="text-red-500 text-xl md:text-2xl mt-4">
@@ -296,45 +257,36 @@ const StockAnalyzer: React.FC<StockAnalyzerProps> = ({ authToken, currentUserId,
               </div>
             </div>
 
-            {/* Period Selection Bar */}
-            <div className="w-full flex justify-center my-6">
-              <div className="flex flex-row gap-2 bg-gray-900 bg-opacity-80 rounded-full px-4 py-2 shadow-md border border-gray-700">
-                {PERIOD_OPTIONS.map((option) => (
-                  <button
-                    key={option.label}
-                    onClick={() => handlePeriodChange(option)}
-                    className={`px-4 py-1 rounded-full font-semibold border transition-all duration-200
-                      ${selectedPeriod.label === option.label
-                        ? 'bg-teal-500 text-white border-teal-500 shadow'
-                        : 'bg-gray-800 text-gray-300 border-gray-700 hover:bg-teal-600 hover:text-white'}`}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Price Chart with Subtle Period Change Display */}
-            <div className="relative w-full flex flex-col items-center">
-              {priceHistory.length > 1 && (
-                <div className="absolute right-2 top-2 z-10">
-                  <span className={`text-sm font-medium px-2 py-1 rounded
-                    ${periodChange && periodChange >= 0 ? 'bg-green-900/40 text-green-300' : 'bg-red-900/40 text-red-300'}`}>
-                    {periodChange && periodChange >= 0 ? '+' : ''}
-                    {periodChange?.toFixed(2)} ({periodChangePercent?.toFixed(2)}%) over {selectedPeriod.label}
-                  </span>
-                </div>
+            {/* Chart Container */}
+            <div className="relative w-full flex flex-col items-center mt-8">
+              {/* Toggle Button */}
+              {symbol && (
+                <button
+                  onClick={toggleChartType}
+                  title={showTradingViewChart ? "Show Basic Chart" : "Show Advanced Chart"}
+                  className="absolute top-3 right-4 z-20 p-2 rounded-full bg-gray-800/70 border border-gray-700 shadow-md hover:bg-teal-700/80 transition-colors duration-200
+                             text-teal-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-teal-400"
+                  aria-label={showTradingViewChart ? "Show Basic Chart" : "Show Advanced Chart"}
+                >
+                  {/* Swap icon (Heroicons outline/arrows-right-left) */}
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2m0-10l4 4m-4-4v4m-6 8H7a2 2 0 01-2-2v-6a2 2 0 012-2h2m0 10l-4-4m4 4v-4" />
+                  </svg>
+                </button>
               )}
-              {priceHistory.length > 0 ? (
-                <PriceChart
-                  priceHistory={priceHistory}
-                  symbol={stockData.symbol}
-                  isLosing={isStockLosing}
-                  periodLabel={selectedPeriod.label} // Pass period label for x-axis formatting
-                />
+
+              {/* Conditional Chart Rendering - toggle between SymbolOverview and TradingViewChart */}
+              {showTradingViewChart && symbol ? ( // Show Advanced Chart (TradingView)
+                <div className="w-full h-[400px]">
+                  <TradingViewChart symbol={symbol} theme="dark" />
+                </div>
+              ) : symbol ? ( // Show Basic Chart (SymbolOverview) - default
+                <div className="w-full h-[400px]">
+                  <SymbolOverview symbol={symbol} />
+                </div>
               ) : (
                 <div className="w-full text-center mt-8 p-4 bg-gray-800 bg-opacity-70 backdrop-blur-sm rounded-lg shadow-xl border border-gray-700">
-                  <p className="text-gray-400 text-xl">Historical chart data not available.</p>
+                  <p className="text-gray-400 text-xl">No symbol selected for chart display.</p>
                 </div>
               )}
             </div>
