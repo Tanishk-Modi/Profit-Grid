@@ -4,20 +4,24 @@ interface NewsWidgetProps {
   symbol: string;
 }
 
+// Only use BINANCE:... for crypto, and NASDAQ:... for stocks
 function getTradingViewSymbol(symbol: string): string {
-  // If already has a colon, assume it's a full TradingView symbol
   if (symbol.includes(':')) return symbol;
 
   // If it's a crypto symbol like BTC, ETH, etc.
   if (/^[A-Z]{2,6}$/.test(symbol)) {
     // Only append USD if not already ending with USD
-    return `BINANCE:${symbol}USD`;
+    if (!symbol.endsWith('USD')) {
+      return `BINANCE:${symbol}USD`;
+    } else {
+      return `BINANCE:${symbol}`;
+    }
   }
-  // If it's already BTCUSD, ETHUSD, etc. (avoid double USD)
+  // If it's already BTCUSD, ETHUSD, etc.
   if (/^[A-Z]{3,10}USD$/.test(symbol)) {
     return `BINANCE:${symbol}`;
   }
-  // If it's a US stock symbol
+  // If it's a US stock symbol (AAPL, TSLA, etc.)
   if (/^[A-Z]{1,5}$/.test(symbol)) {
     return `NASDAQ:${symbol}`;
   }
@@ -28,10 +32,13 @@ function getTradingViewSymbol(symbol: string): string {
 const NewsWidget: React.FC<NewsWidgetProps> = ({ symbol }) => {
   const container = useRef<HTMLDivElement>(null);
 
-  // Fix: Remove trailing USD if already present before appending USD
+  // Determine correct TradingView symbol for news
   let tradingViewSymbol = symbol.trim().toUpperCase();
-  if (/^[A-Z]{2,6}$/.test(tradingViewSymbol)) {
-    // If symbol already ends with USD, don't append again
+  // If it's a stock, use NASDAQ:SYMBOL, not BINANCE:SYMBOLUSD
+  if (/^[A-Z]{1,5}$/.test(tradingViewSymbol)) {
+    tradingViewSymbol = `NASDAQ:${tradingViewSymbol}`;
+  } else if (/^[A-Z]{2,6}$/.test(tradingViewSymbol)) {
+    // If it's a crypto symbol like BTC, ETH, etc.
     if (!tradingViewSymbol.endsWith('USD')) {
       tradingViewSymbol = `BINANCE:${tradingViewSymbol}USD`;
     } else {
@@ -39,8 +46,6 @@ const NewsWidget: React.FC<NewsWidgetProps> = ({ symbol }) => {
     }
   } else if (/^[A-Z]{3,10}USD$/.test(tradingViewSymbol)) {
     tradingViewSymbol = `BINANCE:${tradingViewSymbol}`;
-  } else if (/^[A-Z]{1,5}$/.test(tradingViewSymbol)) {
-    tradingViewSymbol = `NASDAQ:${tradingViewSymbol}`;
   } else if (!tradingViewSymbol.includes(':')) {
     tradingViewSymbol = tradingViewSymbol;
   }
