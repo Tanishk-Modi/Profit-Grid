@@ -216,12 +216,12 @@ function App() {
                         <button
                             onClick={handleBackToHome}
                             className="px-4 py-2 rounded-full font-semibold text-sm
-                                    bg-gradient-to-r from-teal-500 to-green-600
-                                    hover:from-teal-600 hover:to-green-700
+                                    bg-gradient-to-r from-blue-500 to-blue-600
+                                    hover:from-blue-600 hover:to-blue-700
                                     shadow-md hover:shadow-lg
                                     hover:scale-[1.02]
                                     transition-all duration-200 ease-in-out
-                                    focus:outline-none focus:ring-2 focus:ring-green-400"
+                                    focus:outline-none focus:ring-2 focus:ring-blue-400"
                         >
                             Back to Stocks
                         </button>
