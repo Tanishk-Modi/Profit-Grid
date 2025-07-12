@@ -95,6 +95,19 @@ function App() {
                   </span>
               </div>
               <div className="flex items-center space-x-4">
+                  {/* Crypto button moved outside conditional rendering */}
+                  <button
+                      onClick={() => setCurrentView('Crypto')}
+                      className="px-4 py-2 rounded-full font-semibold text-sm
+                                bg-gradient-to-r from-orange-500 to-red-600
+                                hover:from-orange-600 hover:to-red-700
+                                shadow-md hover:shadow-lg
+                                hover:scale-[1.02]
+                                transition-all duration-200 ease-in-out
+                                focus:outline-none focus:ring-2 focus:ring-orange-400"
+                  >
+                      Crypto
+                  </button>
                   {user.token && user.username ? (
                       <>
                         <span className="hidden sm:inline text-gray-300">Welcome, {user.username}!</span>
@@ -121,18 +134,6 @@ function App() {
                     </>
                   ) : (
                       <>
-                      <button 
-                            onClick={() => setCurrentView('Crypto')}
-                            className="px-4 py-2 rounded-full font-semibold text-sm
-                                    bg-gradient-to-r from-orange-500 to-red-600
-                                    hover:from-orange-600 hover:to-red-700
-                                    shadow-md hover:shadow-lg
-                                    hover:scale-[1.02]
-                                    transition-all duration-200 ease-in-out
-                                    focus:outline-none focus:ring-2 focus:ring-orange-400"
-                        >
-                            Crypto
-                        </button>
                         <button
                             onClick={() => handleShowAuth('Login')}
                             className="px-4 py-2 rounded-full font-semibold text-sm
@@ -196,11 +197,11 @@ function App() {
           <Login onLoginSuccess={handleLoginSuccess} onSwitchToRegister={() => setCurrentView('Register')} onBackToHome={handleBackToHome} />
         </div>
       );
-    } else if (currentView === 'Crypto') { // Crypto view
+    } else if (currentView === 'Crypto') { // New Crypto view
         return (
             <div className="relative w-full">
                 {/* Header for Crypto page */}
-                <header className="fixed top-0 left-0 right-0 z-20 bg-[#080d1a] p-4 flex justify-between items-center shadow-lg">
+                <header className="fixed top-0 left-0 right-0 z-20 bg-gray-900 p-4 flex justify-between items-center shadow-lg">
                     <div className="flex items-center space-x-3">
                         <img 
                             src="stocklogo.png" 
@@ -208,19 +209,19 @@ function App() {
                             className="h-10 w-16 object-contain"
                         />
                         <span className="text-xl md:text-2xl hidden sm:inline font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">
-                            Profit Grid
+                            Crypto Grid
                         </span>
                     </div>
                     <div className="flex items-center space-x-4">
                         <button
                             onClick={handleBackToHome}
                             className="px-4 py-2 rounded-full font-semibold text-sm
-                                    bg-gradient-to-r from-orange-500 to-red-600
-                                    hover:from-orange-600 hover:to-red-700
+                                    bg-gradient-to-r from-teal-500 to-green-600
+                                    hover:from-teal-600 hover:to-green-700
                                     shadow-md hover:shadow-lg
                                     hover:scale-[1.02]
                                     transition-all duration-200 ease-in-out
-                                    focus:outline-none focus:ring-2 focus:ring-orange-400"
+                                    focus:outline-none focus:ring-2 focus:ring-green-400"
                         >
                             Back to Stocks
                         </button>
@@ -252,23 +253,19 @@ function App() {
                             <button
                                 onClick={() => handleShowAuth('Login')}
                                 className="px-4 py-2 rounded-full font-semibold text-sm
-                                            bg-gradient-to-r from-teal-500 to-green-600
-                                            hover:from-teal-600 hover:to-green-700
-                                            shadow-md hover:shadow-lg
-                                            hover:scale-[1.02]
-                                            transition-all duration-200 ease-in-out
-                                            focus:outline-none focus:ring-2 focus:ring-green-400"
+                                        bg-gradient-to-r from-teal-500 to-green-600
+                                        hover:from-teal-600 hover:to-green-700
+                                        shadow-md hover:shadow-lg
+                                        hover:scale-[1.02]
+                                        transition-all duration-200 ease-in-out
+                                        focus:outline-none focus:ring-2 focus:ring-green-400"
                             >
                                 Login
                             </button>
                         )}
                     </div>
                 </header>
-                {/* TradingView Ticker Tape Widget */}
-                <div className="relative top-[68px] z-10 w-full"> 
-                    <TickerTape />
-                </div>
-                <div className="pt-[35px]"> {/* Adjust padding top to account for fixed header */}
+                <div className="pt-[68px]"> {/* Adjust padding top to account for fixed header */}
                     <CryptoAnalyzer />
                 </div>
             </div>

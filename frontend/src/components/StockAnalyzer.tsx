@@ -137,11 +137,11 @@ const StockAnalyzer: React.FC<StockAnalyzerProps> = ({ authToken, currentUserId,
   return (
     <div
       className="relative flex flex-col items-center justify-start min-h-screen pt-16 pb-8
-                 bg-gradient-to-b from-gray-900 to-black text-gray-100 overflow-hidden"
+                 bg-gradient-to-b from-gray-925 to-black text-gray-100 overflow-hidden"
     >
       {/* Background Grid/Effect */}
       <div
-        className="absolute inset-0 z-0 opacity-15"
+        className="absolute inset-0 z-0 opacity-25"
         style={{
           backgroundImage: 'linear-gradient(to right, #374151 1px, transparent 1px), linear-gradient(to bottom, #374151 1px, transparent 1px)',
           backgroundSize: '40px 40px',

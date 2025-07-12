@@ -4,7 +4,7 @@ const CryptoAnalyzer: React.FC = () => {
   return (
     <div
       className="relative flex flex-col items-center justify-start min-h-screen pt-16 pb-8
-                 bg-gradient-to-b from-gray-950 to-black text-gray-100 overflow-hidden"
+                 bg-gradient-to-b from-gray-925 to-black text-gray-100 overflow-hidden"
     >
       {/* Background Grid/Effect - Orange/Black Theme */}
       <div
@@ -44,10 +44,6 @@ const CryptoAnalyzer: React.FC = () => {
           </button>
         </div>
 
-        {/* Placeholder for Crypto TradingView Widgets */}
-        <div className="w-full text-center mt-8 p-8 bg-gray-900 bg-opacity-70 backdrop-blur-sm rounded-lg shadow-xl border border-gray-700">
-          <p className="text-gray-400 text-xl">Crypto TradingView Widgets will go here!</p>
-        </div>
       </div>
     </div>
   );
