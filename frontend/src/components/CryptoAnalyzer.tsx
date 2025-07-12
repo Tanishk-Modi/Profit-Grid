@@ -6,22 +6,37 @@ import NewsWidget from './NewsWidget';
 import AnalysisWidget from './AnalysisWidget';
 import TickerTape from './TickerTape';
 
+// Helper to normalize input to a TradingView crypto symbol (e.g. BTC -> BTCUSD)
+function normalizeCryptoSymbol(input: string): string {
+  const upper = input.trim().toUpperCase();
+  // If already looks like BTCUSD, ETHUSD, etc.
+  if (/^[A-Z]{3,10}USD$/.test(upper)) return upper;
+  // If just BTC, ETH, etc., convert to BTCUSD, ETHUSD
+  if (/^[A-Z]{2,6}$/.test(upper)) return upper + 'USD';
+  return upper;
+}
+
 const CryptoAnalyzer: React.FC = () => {
-  const [symbol, setSymbol] = useState<string>('');
+  const [inputValue, setInputValue] = useState<string>('');
+  const [symbol, setSymbol] = useState<string>(''); // symbol for widgets
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [showTradingViewChart, setShowTradingViewChart] = useState<boolean>(false);
 
-  const handleSearch = useCallback(async (searchSymbol: string) => {
+  const handleSearch = useCallback(async (searchInput: string) => {
     setLoading(true);
     setError(null);
     setShowTradingViewChart(false);
 
-    if (!searchSymbol) {
+    if (!searchInput) {
       setError("Please enter a crypto symbol.");
       setLoading(false);
       return;
     }
+
+    // Normalize input to TradingView symbol (BTC -> BTCUSD)
+    const normalized = normalizeCryptoSymbol(searchInput);
+    setSymbol(normalized);
 
     // Simulate loading for UX
     setTimeout(() => setLoading(false), 500);
@@ -47,10 +62,6 @@ const CryptoAnalyzer: React.FC = () => {
         }}
       ></div>
 
-      <div className='fixed top-0 left-0 right-0 z-50 mt-18'>
-        <TickerTape />
-      </div>
-
       {/* Main Content Area */}
       <div className="relative z-10 text-center p-4 md:p-8 w-full max-w-5xl mx-auto flex flex-col items-center">
         {/* Title/Header */}
@@ -62,20 +73,20 @@ const CryptoAnalyzer: React.FC = () => {
         <div className="flex w-full max-w-md bg-gray-900 rounded-full shadow-lg overflow-hidden mb-8">
           <input
             type="text"
-            placeholder="Enter symbol (e.g., BTCUSD, ETHUSD)"
+            placeholder="Enter symbol (e.g., BTC, ETH, BTCUSD, ETHUSD)"
             className="flex-grow px-6 py-3 bg-transparent text-gray-200 placeholder-gray-500
              focus:outline-none focus:ring-0 text-sm md:text-lg lg:text-xl
              placeholder:text-sm md:placeholder:text-base"
-            value={symbol}
-            onChange={(e) => setSymbol(e.target.value.toUpperCase())}
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value.toUpperCase())}
             onKeyPress={(e) => {
               if (e.key === 'Enter') {
-                handleSearch(symbol);
+                handleSearch(inputValue);
               }
             }}
           />
           <button
-            onClick={() => handleSearch(symbol)}
+            onClick={() => handleSearch(inputValue)}
             className="px-6 py-3 font-semibold text-lg
                        bg-gradient-to-r from-orange-500 to-red-600
                        hover:from-orange-600 hover:to-red-700

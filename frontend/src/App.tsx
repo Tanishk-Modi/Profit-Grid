@@ -265,7 +265,14 @@ function App() {
                         )}
                     </div>
                 </header>
-                <div className="pt-[68px]"> {/* Adjust padding top to account for fixed header */}
+                {/* TradingView Ticker Tape Widget */}
+                <div className="relative top-[68px] pb-0">
+                    {/* Reduce padding for ticker tape in crypto view */}
+                    <div className="w-full">
+                        <TickerTape />
+                    </div>
+                </div>
+                <div className="pt-[38px]">
                     <CryptoAnalyzer />
                 </div>
             </div>

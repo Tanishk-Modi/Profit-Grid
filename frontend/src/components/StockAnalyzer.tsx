@@ -16,6 +16,7 @@ interface StockAnalyzerProps {
 
 const StockAnalyzer: React.FC<StockAnalyzerProps> = ({ authToken, currentUserId, initialSymbol }) => {
 
+  const [inputValue, setInputValue] = useState<string>(''); 
   const [symbol, setSymbol] = useState<string>('');
   const [stockData, setStockData] = useState<any>(null);
   const [companyProfile, setCompanyProfile] = useState<any>(null);
@@ -89,7 +90,8 @@ const StockAnalyzer: React.FC<StockAnalyzerProps> = ({ authToken, currentUserId,
 
   useEffect(() => {
     if (initialSymbol && initialSymbol !== symbol) {
-      setSymbol(initialSymbol);
+      setInputValue(initialSymbol); 
+      setSymbol(initialSymbol);    
       handleSearch(initialSymbol);
     }
   }, [initialSymbol, symbol, handleSearch]);
@@ -164,16 +166,20 @@ const StockAnalyzer: React.FC<StockAnalyzerProps> = ({ authToken, currentUserId,
             className="flex-grow px-6 py-3 bg-transparent text-gray-200 placeholder-gray-500
              focus:outline-none focus:ring-0 text-sm md:text-lg lg:text-xl
              placeholder:text-sm md:placeholder:text-base"
-            value={symbol} // Bind input value to 'symbol' state
-            onChange={(e) => setSymbol(e.target.value.toUpperCase())}
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value.toUpperCase())}
             onKeyPress={(e) => {
                 if (e.key === 'Enter') {
-                    handleSearch(symbol); // Use current symbol state
+                    setSymbol(inputValue); 
+                    handleSearch(inputValue);
                 }
             }}
           />
           <button
-            onClick={() => handleSearch(symbol)} // Use current symbol state
+            onClick={() => {
+              setSymbol(inputValue);
+              handleSearch(inputValue);
+            }}
             className="px-6 py-3 font-semibold text-lg
                        bg-gradient-to-r from-teal-500 to-green-600
                        hover:from-teal-600 hover:to-green-700
