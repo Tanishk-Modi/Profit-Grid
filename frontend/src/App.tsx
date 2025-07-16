@@ -5,6 +5,7 @@ import Register from './auth/Register';
 import WatchlistDisplay from './components/WatchlistDisplay';
 import TickerTape from './components/TickerTape'; 
 import CryptoAnalyzer from './components/CryptoAnalyzer'; // Import the new component
+import { Analytics } from "@vercel/analytics/next";
 
 interface UserState {
   token: string | null;
@@ -295,6 +296,7 @@ function App() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black font-sans antialiased">
       {renderContent()}
+      <Analytics />
     </div>
   );
 }
