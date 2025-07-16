@@ -12,12 +12,14 @@ const QuoteDisplay: React.FC<QuoteDisplayProps> = ({ stockData }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-4 text-lg">
         <div className="flex flex-col">
           <span className="text-gray-400 font-semibold text-base md:text-lg">Current Price</span>
-          <span className="text-green-400 text-3xl md:text-4xl font-bold">${stockData.price.toFixed(2)}</span>
+          <span className="text-green-400 text-3xl md:text-4xl font-bold">
+            ${stockData.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </span>
         </div>
         <div className="flex flex-col">
           <span className="text-gray-400 font-semibold text-base md:text-lg">Today's Change</span>
           <span className={`text-2xl md:text-3xl font-bold ${parseFloat(stockData.change) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-            {stockData.change} ({stockData.change_percent})
+            {parseFloat(stockData.change).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ({stockData.change_percent})
           </span>
         </div>
         <div className="flex flex-col">
@@ -28,19 +30,27 @@ const QuoteDisplay: React.FC<QuoteDisplayProps> = ({ stockData }) => {
         </div>
         <div className="flex flex-col">
           <span className="text-gray-400 font-semibold text-base">Open</span>
-          <span className="text-gray-200 text-xl">${stockData.open_price.toFixed(2)}</span>
+          <span className="text-gray-200 text-xl">
+            ${stockData.open_price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </span>
         </div>
         <div className="flex flex-col">
           <span className="text-gray-400 font-semibold text-base">High</span>
-          <span className="text-gray-200 text-xl">${stockData.high.toFixed(2)}</span>
+          <span className="text-gray-200 text-xl">
+            ${stockData.high.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </span>
         </div>
         <div className="flex flex-col">
           <span className="text-gray-400 font-semibold text-base">Low</span>
-          <span className="text-gray-200 text-xl">${stockData.low.toFixed(2)}</span>
+          <span className="text-gray-200 text-xl">
+            ${stockData.low.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </span>
         </div>
         <div className="flex flex-col">
           <span className="text-gray-400 font-semibold text-base">Previous Close</span>
-          <span className="text-gray-200 text-xl">${parseFloat(stockData.previous_close).toFixed(2)}</span>
+          <span className="text-gray-200 text-xl">
+            ${parseFloat(stockData.previous_close).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </span>
         </div>
         <div className="flex flex-col">
           <span className="text-gray-400 font-semibold text-base">Last Updated</span>

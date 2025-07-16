@@ -4,7 +4,9 @@ import TradingViewChart from './TradingViewChart';
 import SymbolOverview from './SymbolOverview';
 import NewsWidget from './NewsWidget';
 import AnalysisWidget from './AnalysisWidget';
-import TickerTape from './TickerTape';
+import QuoteDisplay from './QuoteDisplay';
+import KeyMetrics from './KeyMetrics';
+import CompanyProfile from './CompanyProfile';
 
 // Helper to normalize input to a TradingView crypto symbol (e.g. BTC -> BTCUSD)
 function normalizeCryptoSymbol(input: string): string {
@@ -16,9 +18,14 @@ function normalizeCryptoSymbol(input: string): string {
   return upper;
 }
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+
 const CryptoAnalyzer: React.FC = () => {
   const [inputValue, setInputValue] = useState<string>('');
-  const [symbol, setSymbol] = useState<string>(''); // symbol for widgets
+  const [symbol, setSymbol] = useState<string>(''); // normalized symbol for widgets and API
+  const [stockData, setStockData] = useState<any>(null);
+  const [companyProfile, setCompanyProfile] = useState<any>(null);
+  const [keyMetrics, setKeyMetrics] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [showTradingViewChart, setShowTradingViewChart] = useState<boolean>(false);
@@ -27,6 +34,9 @@ const CryptoAnalyzer: React.FC = () => {
     setLoading(true);
     setError(null);
     setShowTradingViewChart(false);
+    setStockData(null);
+    setCompanyProfile(null);
+    setKeyMetrics(null);
 
     if (!searchInput) {
       setError("Please enter a crypto symbol.");
@@ -38,8 +48,45 @@ const CryptoAnalyzer: React.FC = () => {
     const normalized = normalizeCryptoSymbol(searchInput);
     setSymbol(normalized);
 
-    // Simulate loading for UX
-    setTimeout(() => setLoading(false), 500);
+    try {
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+
+      // Fetch Quote
+      const stockResponse = await fetch(`${API_BASE_URL}/api/v1/stock/${normalized}`, { headers });
+      if (!stockResponse.ok) {
+        const errorData = await stockResponse.json();
+        throw new Error(errorData.detail || 'Failed to fetch quote. Please check the symbol and try again.');
+      }
+      const stockQuoteData = await stockResponse.json();
+      setStockData(stockQuoteData);
+
+      // Fetch Company Profile
+      const profileResponse = await fetch(`${API_BASE_URL}/api/v1/profile/${normalized}`, { headers });
+      if (!profileResponse.ok) {
+        setCompanyProfile(null);
+      } else {
+        const companyProfileData = await profileResponse.json();
+        setCompanyProfile(companyProfileData);
+      }
+
+      // Fetch Key Metrics
+      const keyMetricsResponse = await fetch(`${API_BASE_URL}/api/v1/key-metrics/${normalized}`, { headers });
+      if (!keyMetricsResponse.ok) {
+        setKeyMetrics(null);
+      } else {
+        const keyMetricsData = await keyMetricsResponse.json();
+        setKeyMetrics(keyMetricsData);
+      }
+    } catch (err: any) {
+      setError(err.message || "An unexpected error occurred during data fetching.");
+      setStockData(null);
+      setCompanyProfile(null);
+      setKeyMetrics(null);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   // Toggle chart type between SymbolOverview and TradingViewChart
@@ -107,23 +154,28 @@ const CryptoAnalyzer: React.FC = () => {
           <div className="text-red-500 text-xl md:text-2xl mt-4">
             Error: {error}
           </div>
-        ) : symbol ? (
+        ) : stockData ? (
           <div className="w-full">
+            {/* Quote Display */}
+            <QuoteDisplay stockData={stockData} />
+
             {/* Chart Container */}
             <div className="relative w-full flex flex-col items-center mt-8">
               {/* Toggle Button */}
-              <button
-                onClick={toggleChartType}
-                title={showTradingViewChart ? "Show Basic Chart" : "Show Advanced Chart"}
-                className="absolute top-3 right-4 z-20 p-2 rounded-full bg-gray-800/70 border border-gray-700 shadow-md hover:bg-orange-700/80 transition-colors duration-200
-                           text-orange-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
-                aria-label={showTradingViewChart ? "Show Basic Chart" : "Show Advanced Chart"}
-              >
-                {/* Swap icon */}
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2m0-10l4 4m-4-4v4m-6 8H7a2 2 0 01-2-2v-6a2 2 0 012-2h2m0 10l-4-4m4 4v-4" />
-                </svg>
-              </button>
+              {symbol && (
+                <button
+                  onClick={toggleChartType}
+                  title={showTradingViewChart ? "Show Basic Chart" : "Show Advanced Chart"}
+                  className="absolute top-3 right-4 z-20 p-2 rounded-full bg-gray-800/70 border border-gray-700 shadow-md hover:bg-orange-700/80 transition-colors duration-200
+                             text-orange-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
+                  aria-label={showTradingViewChart ? "Show Basic Chart" : "Show Advanced Chart"}
+                >
+                  {/* Swap icon */}
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2m0-10l4 4m-4-4v4m-6 8H7a2 2 0 01-2-2v-6a2 2 0 012-2h2m0 10l-4-4m4 4v-4" />
+                  </svg>
+                </button>
+              )}
 
               {/* Conditional Chart Rendering */}
               {showTradingViewChart ? (
@@ -136,6 +188,12 @@ const CryptoAnalyzer: React.FC = () => {
                 </div>
               )}
             </div>
+
+            {/* Company Profile Display */}
+            <CompanyProfile companyProfile={companyProfile} />
+
+            {/* Key Metrics Display */}
+            <KeyMetrics keyMetrics={keyMetrics} />
 
             {/* News & Analysis Widgets */}
             <div className="w-full flex flex-col md:flex-row gap-8 mt-8">

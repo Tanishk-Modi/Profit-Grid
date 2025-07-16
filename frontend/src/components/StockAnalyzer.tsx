@@ -14,6 +14,16 @@ interface StockAnalyzerProps {
   initialSymbol: string | null;
 }
 
+// Helper to normalize input to a TradingView crypto symbol (e.g. BTC -> BTCUSD)
+const CRYPTO_SYMBOLS = ['BTC', 'ETH', 'SOL', 'DOGE', 'BNB', 'XRP', 'ADA', 'AVAX', 'LTC', 'LINK', 'MATIC', 'DOT', 'SHIB', 'BCH', 'TRX', 'UNI', 'XLM', 'ATOM', 'FIL', 'ETC', 'APT', 'ARB', 'OP', 'NEAR', 'HBAR', 'VET', 'ICP', 'GRT', 'QNT', 'AAVE', 'MKR', 'ALGO', 'EOS', 'XTZ', 'SAND', 'MANA', 'AXS', 'THETA', 'EGLD', 'KSM', 'CAKE', 'RUNE', 'ZEC', 'ENJ', 'CHZ', 'CRV', 'COMP', '1INCH', 'BAT', 'ZRX', 'SNX', 'REN', 'YFI', 'UMA', 'BAL', 'SRM', 'CVC', 'BNT', 'LRC', 'NMR', 'OXT', 'SKL', 'STORJ', 'ANT', 'BAND', 'COTI', 'DNT', 'GNO', 'KNC', 'LOOM', 'MIR', 'MLN', 'PAXG', 'REP', 'RLC', 'SUSHI', 'TRB', 'WNXM', 'XEM', 'XMR', 'ZIL', 'ZEN'];
+
+function normalizeCryptoSymbol(input: string): string {
+  const upper = input.trim().toUpperCase();
+  if (CRYPTO_SYMBOLS.includes(upper)) return upper + 'USD';
+  if (/^[A-Z]{3,10}USD$/.test(upper)) return upper;
+  return upper;
+}
+
 const StockAnalyzer: React.FC<StockAnalyzerProps> = ({ authToken, currentUserId, initialSymbol }) => {
 
   const [inputValue, setInputValue] = useState<string>(''); 
@@ -43,13 +53,19 @@ const StockAnalyzer: React.FC<StockAnalyzerProps> = ({ authToken, currentUserId,
       return;
     }
 
+    // --- Normalize input for crypto symbols only ---
+    let normalizedSymbol = searchSymbol.trim().toUpperCase();
+    if (CRYPTO_SYMBOLS.includes(normalizedSymbol)) {
+      normalizedSymbol = normalizeCryptoSymbol(normalizedSymbol);
+    }
+
     try {
       const headers: HeadersInit = {
         'Content-Type': 'application/json',
       };
 
      // Fetch Stock Quote
-      const stockResponse = await fetch(`${API_BASE_URL}/api/v1/stock/${searchSymbol}`, { headers });
+      const stockResponse = await fetch(`${API_BASE_URL}/api/v1/stock/${normalizedSymbol}`, { headers });
       if (!stockResponse.ok) {
         const errorData = await stockResponse.json();
         throw new Error(errorData.detail || 'Failed to fetch stock quote. Please check the symbol and try again.');
@@ -58,7 +74,7 @@ const StockAnalyzer: React.FC<StockAnalyzerProps> = ({ authToken, currentUserId,
       setStockData(stockQuoteData);
 
       // Fetch Company Profile
-      const profileResponse = await fetch(`${API_BASE_URL}/api/v1/profile/${searchSymbol}`, { headers });
+      const profileResponse = await fetch(`${API_BASE_URL}/api/v1/profile/${normalizedSymbol}`, { headers });
       if (!profileResponse.ok) {
           console.error("Failed to fetch company profile:", await profileResponse.json());
           setCompanyProfile(null); 
@@ -68,7 +84,7 @@ const StockAnalyzer: React.FC<StockAnalyzerProps> = ({ authToken, currentUserId,
       }
 
       // Fetch Key Metrics
-      const keyMetricsResponse = await fetch(`${API_BASE_URL}/api/v1/key-metrics/${searchSymbol}`, { headers });
+      const keyMetricsResponse = await fetch(`${API_BASE_URL}/api/v1/key-metrics/${normalizedSymbol}`, { headers });
       if (!keyMetricsResponse.ok) {
           console.error("Failed to fetch key metrics:", await keyMetricsResponse.json());
           setKeyMetrics(null);
@@ -77,6 +93,7 @@ const StockAnalyzer: React.FC<StockAnalyzerProps> = ({ authToken, currentUserId,
           setKeyMetrics(keyMetricsData);
       }
 
+      setSymbol(normalizedSymbol);
 
     } catch (err: any) {
       setError(err.message || "An unexpected error occurred during data fetching.");
@@ -91,7 +108,11 @@ const StockAnalyzer: React.FC<StockAnalyzerProps> = ({ authToken, currentUserId,
   useEffect(() => {
     if (initialSymbol && initialSymbol !== symbol) {
       setInputValue(initialSymbol); 
-      setSymbol(initialSymbol);    
+      let normalized = initialSymbol.trim().toUpperCase();
+      if (CRYPTO_SYMBOLS.includes(normalized)) {
+        normalized = normalizeCryptoSymbol(normalized);
+      }
+      setSymbol(normalized);    
       handleSearch(initialSymbol);
     }
   }, [initialSymbol, symbol, handleSearch]);
@@ -162,7 +183,7 @@ const StockAnalyzer: React.FC<StockAnalyzerProps> = ({ authToken, currentUserId,
         <div className="flex w-full max-w-md bg-gray-900 rounded-full shadow-lg overflow-hidden mb-8">
           <input
             type="text"
-            placeholder="Enter ticker symbol (e.g., AAPL)"
+            placeholder="Enter ticker symbol (e.g., AAPL, BTC)"
             className="flex-grow px-6 py-3 bg-transparent text-gray-200 placeholder-gray-500
              focus:outline-none focus:ring-0 text-sm md:text-lg lg:text-xl
              placeholder:text-sm md:placeholder:text-base"
