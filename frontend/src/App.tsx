@@ -4,8 +4,8 @@ import Login from './auth/Login';
 import Register from './auth/Register';
 import WatchlistDisplay from './components/WatchlistDisplay';
 import TickerTape from './components/TickerTape'; 
-import CryptoAnalyzer from './components/CryptoAnalyzer'; // Import the new component
-import { Analytics } from "@vercel/analytics/next";
+import CryptoAnalyzer from './components/CryptoAnalyzer'; 
+import { Analytics } from "@vercel/analytics/react";
 
 interface UserState {
   token: string | null;
@@ -13,7 +13,7 @@ interface UserState {
   username: string | null;
 }
 
-type AppView = 'Login' | 'Register' | 'Analyzer' | 'Watchlist' | 'Crypto'; // Added 'Crypto' view
+type AppView = 'Login' | 'Register' | 'Analyzer' | 'Watchlist' | 'Crypto'; 
 
 function App() {
   const [user, setUser] = useState<UserState>({ token: null, userId: null, username: null });
@@ -58,11 +58,11 @@ function App() {
     setCurrentView('Login'); 
   };
 
-  const handleBackToHome = () => { // New function to go back to home
+  const handleBackToHome = () => { 
     setCurrentView('Analyzer');
   };
 
-  const handleShowAuth = (view: 'Login') => { // Only 'Login' now
+  const handleShowAuth = (view: 'Login') => { 
     setCurrentView(view);
   };
 
@@ -198,7 +198,7 @@ function App() {
           <Login onLoginSuccess={handleLoginSuccess} onSwitchToRegister={() => setCurrentView('Register')} onBackToHome={handleBackToHome} />
         </div>
       );
-    } else if (currentView === 'Crypto') { // New Crypto view
+    } else if (currentView === 'Crypto') { 
         return (
             <div className="relative w-full">
                 {/* Header for Crypto page */}
@@ -217,14 +217,14 @@ function App() {
                         <button
                             onClick={handleBackToHome}
                             className="px-4 py-2 rounded-full font-semibold text-sm
-                                    bg-gradient-to-r from-blue-500 to-blue-600
-                                    hover:from-blue-600 hover:to-blue-700
+                                    bg-gradient-to-r from-teal-500 to-green-600
+                                    hover:from-teal-600 hover:to-green-700
                                     shadow-md hover:shadow-lg
                                     hover:scale-[1.02]
                                     transition-all duration-200 ease-in-out
-                                    focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                    focus:outline-none focus:ring-2 focus:ring-green-400"
                         >
-                            Back to Stocks
+                            Stocks
                         </button>
                         {user.token && user.username ? (
                             <>
@@ -268,7 +268,6 @@ function App() {
                 </header>
                 {/* TradingView Ticker Tape Widget */}
                 <div className="relative top-[68px] pb-0">
-                    {/* Reduce padding for ticker tape in crypto view */}
                     <div className="w-full">
                         <TickerTape />
                     </div>
